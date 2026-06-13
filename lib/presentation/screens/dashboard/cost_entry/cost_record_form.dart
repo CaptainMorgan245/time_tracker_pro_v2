@@ -73,7 +73,9 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
         suffixIcon: suffixIcon,
       );
 
-  static const _fieldStyle = TextStyle(fontSize: 13);
+  // Explicit color: a bare TextStyle(fontSize: 13) with no color renders
+  // invisible against the surface (matching what bit the time-entry form).
+  static const _fieldStyle = TextStyle(fontSize: 13, color: Colors.black87);
 
   int? _internalProjectId(List<DbProject> projects) {
     for (final p in projects) {

@@ -15,6 +15,14 @@ class TimeEntriesDao extends DatabaseAccessor<AppDatabase>
 
   Stream<List<DbTimeEntry>> watchAll() => select(timeEntries).watch();
 
+  /// Completed, non-deleted entries (the ones that show in the records list),
+  /// newest first. Mirrors the original app's `is_deleted = 0 AND end_time IS
+  /// NOT NULL ORDER BY start_time DESC`.
+  Stream<List<DbTimeEntry>> watchCompleted() => (select(timeEntries)
+        ..where((t) => t.isDeleted.equals(0) & t.endTime.isNotNull())
+        ..orderBy([(t) => OrderingTerm.desc(t.startTime)]))
+      .watch();
+
   Future<DbTimeEntry?> getById(int id) =>
       (select(timeEntries)..where((t) => t.id.equals(id))).getSingleOrNull();
 
@@ -29,4 +37,10 @@ class TimeEntriesDao extends DatabaseAccessor<AppDatabase>
 
   Future<int> deleteById(int id) =>
       (delete(timeEntries)..where((t) => t.id.equals(id))).go();
+
+  /// Soft-delete: flags the row as deleted rather than removing it, matching the
+  /// original app's `UPDATE time_entries SET is_deleted = 1 WHERE id = ?`.
+  Future<int> softDeleteById(int id) =>
+      (update(timeEntries)..where((t) => t.id.equals(id)))
+          .write(const TimeEntriesCompanion(isDeleted: Value(1)));
 }

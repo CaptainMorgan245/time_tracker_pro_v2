@@ -9,6 +9,7 @@ import 'analytics_screen.dart';
 import 'cost_entry_screen.dart';
 import 'dashboard_home_tab.dart';
 import 'invoices_screen.dart';
+import 'time_entry_screen.dart';
 
 /// Main shell, ported from the original app's DashboardScreen: a dynamic AppBar
 /// title, a navigation drawer, an [IndexedStack] body over the four main areas,
@@ -79,6 +80,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               leading: const Icon(Icons.work_outline),
               title: const Text('Clients & Projects'),
               onTap: () => _open(const ClientsProjectsScreen()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.access_time),
+              title: const Text('Time Entry Form'),
+              onTap: () => _open(const TimeEntryScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.settings_outlined),
