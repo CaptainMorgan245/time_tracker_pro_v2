@@ -81,7 +81,7 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
-          await _seedInitialData();
+          await seedDefaults();
         },
         // DEVELOPMENT-ONLY strategy: any schemaVersion bump wipes the database
         // and rebuilds it from scratch, then re-seeds defaults. Real data is
@@ -91,7 +91,7 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (m, from, to) async {
           await destroyEverything(m);
           await m.createAll();
-          await _seedInitialData();
+          await seedDefaults();
         },
         beforeOpen: (details) async {
           // Enforce foreign keys for every connection. This must live here, not
@@ -112,8 +112,9 @@ class AppDatabase extends _$AppDatabase {
 
   /// Inserts the default singleton rows plus the internal "Company Expenses"
   /// client and project, matching the v23 `onCreate` seed. Shared by the create
-  /// and (development) upgrade paths.
-  Future<void> _seedInitialData() async {
+  /// and (development) upgrade paths, and by `BackupRepository.clearAllData`
+  /// after a destructive wipe so the app is left in a usable state.
+  Future<void> seedDefaults() async {
     // Default app-settings row (id == 1).
     await into(settings).insert(
       SettingsCompanion.insert(
