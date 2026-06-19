@@ -62,7 +62,7 @@ class TimerActions extends Notifier<AsyncValue<void>> {
     required int employeeId,
     int? costCodeId,
     String? workDetails,
-    double? hourlyRate,
+    int? hourlyRate,
     DateTime? startTime,
   }) async {
     state = const AsyncValue.loading();
@@ -88,7 +88,7 @@ class TimerActions extends Notifier<AsyncValue<void>> {
     required int employeeId,
     int? costCodeId,
     String? workDetails,
-    double? hourlyRate,
+    int? hourlyRate,
     required DateTime startTime,
   }) async {
     state = const AsyncValue.loading();

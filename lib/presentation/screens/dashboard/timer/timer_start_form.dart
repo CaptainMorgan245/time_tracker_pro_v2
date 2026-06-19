@@ -81,7 +81,7 @@ class _TimerStartFormState extends ConsumerState<TimerStartForm> {
     ref.read(editingTimerProvider.notifier).set(null);
   }
 
-  double? _rateFor(int employeeId, List<DbEmployee> employees) {
+  int? _rateFor(int employeeId, List<DbEmployee> employees) {
     for (final e in employees) {
       if (e.id == employeeId) return e.hourlyRate;
     }

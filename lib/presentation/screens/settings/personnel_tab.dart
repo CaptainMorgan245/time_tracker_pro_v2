@@ -44,7 +44,8 @@ class _PersonnelTabState extends ConsumerState<PersonnelTab> {
       await _db.rolesDao.insertRow(
         RolesCompanion(
           name: Value(name),
-          standardRate: Value(double.tryParse(_roleRateController.text) ?? 0.0),
+          standardRate: Value(
+              ((double.tryParse(_roleRateController.text) ?? 0) * 100).round()),
         ),
       );
       _roleNameController.clear();
@@ -63,7 +64,7 @@ class _PersonnelTabState extends ConsumerState<PersonnelTab> {
       RolesCompanion(
         id: Value(role.id),
         name: Value(name),
-        standardRate: Value(rate),
+        standardRate: Value((rate * 100).round()),
       ),
     );
   }
@@ -87,7 +88,7 @@ class _PersonnelTabState extends ConsumerState<PersonnelTab> {
   Future<void> _showEditRoleDialog(DbRole role) async {
     final nameController = TextEditingController(text: role.name);
     final rateController =
-        TextEditingController(text: role.standardRate.toString());
+        TextEditingController(text: (role.standardRate / 100).toStringAsFixed(2));
 
     await showDialog(
       context: context,
@@ -142,7 +143,7 @@ class _PersonnelTabState extends ConsumerState<PersonnelTab> {
     return AppSettingListCard(
       title: 'Roles',
       items: roles
-          .map((r) => '${r.name} (\$${r.standardRate.toStringAsFixed(2)} / hr)')
+          .map((r) => '${r.name} (\$${(r.standardRate / 100).toStringAsFixed(2)} / hr)')
           .toList(),
       onEdit: (index) => _showEditRoleDialog(roles[index]),
     );

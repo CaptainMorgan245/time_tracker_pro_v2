@@ -29,4 +29,13 @@ class MaterialsDao extends DatabaseAccessor<AppDatabase>
 
   Future<int> deleteById(int id) =>
       (delete(materials)..where((t) => t.id.equals(id))).go();
+
+  /// Releases all materials billed to [invoiceId] back to unbilled (used when
+  /// an extras invoice is voided).
+  Future<int> clearInvoiceLink(int invoiceId) =>
+      (update(materials)..where((t) => t.invoiceId.equals(invoiceId)))
+          .write(const MaterialsCompanion(
+        isBilled: Value(0),
+        invoiceId: Value(null),
+      ));
 }

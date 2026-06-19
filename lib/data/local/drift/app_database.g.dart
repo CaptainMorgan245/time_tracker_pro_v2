@@ -65,14 +65,13 @@ class $SettingsTable extends Settings
     'companyHourlyRate',
   );
   @override
-  late final GeneratedColumn<double> companyHourlyRate =
-      GeneratedColumn<double>(
-        'company_hourly_rate',
-        aliasedName,
-        true,
-        type: DriftSqlType.double,
-        requiredDuringInsert: false,
-      );
+  late final GeneratedColumn<int> companyHourlyRate = GeneratedColumn<int>(
+    'company_hourly_rate',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _burdenRateMeta = const VerificationMeta(
     'burdenRate',
   );
@@ -333,7 +332,7 @@ class $SettingsTable extends Settings
         data['${effectivePrefix}vendors'],
       ),
       companyHourlyRate: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}company_hourly_rate'],
       ),
       burdenRate: attachedDatabase.typeMapping.read(
@@ -383,7 +382,7 @@ class DbSetting extends DataClass implements Insertable<DbSetting> {
   final int? nextEmployeeNumber;
   final String? vehicleDesignations;
   final String? vendors;
-  final double? companyHourlyRate;
+  final int? companyHourlyRate;
   final double? burdenRate;
   final int? timeRoundingInterval;
   final int? autoBackupReminderFrequency;
@@ -425,7 +424,7 @@ class DbSetting extends DataClass implements Insertable<DbSetting> {
       map['vendors'] = Variable<String>(vendors);
     }
     if (!nullToAbsent || companyHourlyRate != null) {
-      map['company_hourly_rate'] = Variable<double>(companyHourlyRate);
+      map['company_hourly_rate'] = Variable<int>(companyHourlyRate);
     }
     if (!nullToAbsent || burdenRate != null) {
       map['burden_rate'] = Variable<double>(burdenRate);
@@ -515,9 +514,7 @@ class DbSetting extends DataClass implements Insertable<DbSetting> {
         json['vehicleDesignations'],
       ),
       vendors: serializer.fromJson<String?>(json['vendors']),
-      companyHourlyRate: serializer.fromJson<double?>(
-        json['companyHourlyRate'],
-      ),
+      companyHourlyRate: serializer.fromJson<int?>(json['companyHourlyRate']),
       burdenRate: serializer.fromJson<double?>(json['burdenRate']),
       timeRoundingInterval: serializer.fromJson<int?>(
         json['timeRoundingInterval'],
@@ -547,7 +544,7 @@ class DbSetting extends DataClass implements Insertable<DbSetting> {
       'nextEmployeeNumber': serializer.toJson<int?>(nextEmployeeNumber),
       'vehicleDesignations': serializer.toJson<String?>(vehicleDesignations),
       'vendors': serializer.toJson<String?>(vendors),
-      'companyHourlyRate': serializer.toJson<double?>(companyHourlyRate),
+      'companyHourlyRate': serializer.toJson<int?>(companyHourlyRate),
       'burdenRate': serializer.toJson<double?>(burdenRate),
       'timeRoundingInterval': serializer.toJson<int?>(timeRoundingInterval),
       'autoBackupReminderFrequency': serializer.toJson<int?>(
@@ -569,7 +566,7 @@ class DbSetting extends DataClass implements Insertable<DbSetting> {
     Value<int?> nextEmployeeNumber = const Value.absent(),
     Value<String?> vehicleDesignations = const Value.absent(),
     Value<String?> vendors = const Value.absent(),
-    Value<double?> companyHourlyRate = const Value.absent(),
+    Value<int?> companyHourlyRate = const Value.absent(),
     Value<double?> burdenRate = const Value.absent(),
     Value<int?> timeRoundingInterval = const Value.absent(),
     Value<int?> autoBackupReminderFrequency = const Value.absent(),
@@ -722,7 +719,7 @@ class SettingsCompanion extends UpdateCompanion<DbSetting> {
   final Value<int?> nextEmployeeNumber;
   final Value<String?> vehicleDesignations;
   final Value<String?> vendors;
-  final Value<double?> companyHourlyRate;
+  final Value<int?> companyHourlyRate;
   final Value<double?> burdenRate;
   final Value<int?> timeRoundingInterval;
   final Value<int?> autoBackupReminderFrequency;
@@ -769,7 +766,7 @@ class SettingsCompanion extends UpdateCompanion<DbSetting> {
     Expression<int>? nextEmployeeNumber,
     Expression<String>? vehicleDesignations,
     Expression<String>? vendors,
-    Expression<double>? companyHourlyRate,
+    Expression<int>? companyHourlyRate,
     Expression<double>? burdenRate,
     Expression<int>? timeRoundingInterval,
     Expression<int>? autoBackupReminderFrequency,
@@ -811,7 +808,7 @@ class SettingsCompanion extends UpdateCompanion<DbSetting> {
     Value<int?>? nextEmployeeNumber,
     Value<String?>? vehicleDesignations,
     Value<String?>? vendors,
-    Value<double?>? companyHourlyRate,
+    Value<int?>? companyHourlyRate,
     Value<double?>? burdenRate,
     Value<int?>? timeRoundingInterval,
     Value<int?>? autoBackupReminderFrequency,
@@ -862,7 +859,7 @@ class SettingsCompanion extends UpdateCompanion<DbSetting> {
       map['vendors'] = Variable<String>(vendors.value);
     }
     if (companyHourlyRate.present) {
-      map['company_hourly_rate'] = Variable<double>(companyHourlyRate.value);
+      map['company_hourly_rate'] = Variable<int>(companyHourlyRate.value);
     }
     if (burdenRate.present) {
       map['burden_rate'] = Variable<double>(burdenRate.value);
@@ -1415,22 +1412,22 @@ class $ProjectsTable extends Projects
     'billedHourlyRate',
   );
   @override
-  late final GeneratedColumn<double> billedHourlyRate = GeneratedColumn<double>(
+  late final GeneratedColumn<int> billedHourlyRate = GeneratedColumn<int>(
     'billed_hourly_rate',
     aliasedName,
     true,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _projectPriceMeta = const VerificationMeta(
     'projectPrice',
   );
   @override
-  late final GeneratedColumn<double> projectPrice = GeneratedColumn<double>(
+  late final GeneratedColumn<int> projectPrice = GeneratedColumn<int>(
     'project_price',
     aliasedName,
     true,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _expenseMarkupPercentageMeta =
@@ -1680,11 +1677,11 @@ class $ProjectsTable extends Projects
         data['${effectivePrefix}is_internal'],
       )!,
       billedHourlyRate: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}billed_hourly_rate'],
       ),
       projectPrice: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}project_price'],
       ),
       expenseMarkupPercentage: attachedDatabase.typeMapping.read(
@@ -1720,8 +1717,8 @@ class DbProject extends DataClass implements Insertable<DbProject> {
   final int isCompleted;
   final String? completionDate;
   final int isInternal;
-  final double? billedHourlyRate;
-  final double? projectPrice;
+  final int? billedHourlyRate;
+  final int? projectPrice;
   final double expenseMarkupPercentage;
   final double taxRate;
   final int? parentProjectId;
@@ -1768,10 +1765,10 @@ class DbProject extends DataClass implements Insertable<DbProject> {
     }
     map['is_internal'] = Variable<int>(isInternal);
     if (!nullToAbsent || billedHourlyRate != null) {
-      map['billed_hourly_rate'] = Variable<double>(billedHourlyRate);
+      map['billed_hourly_rate'] = Variable<int>(billedHourlyRate);
     }
     if (!nullToAbsent || projectPrice != null) {
-      map['project_price'] = Variable<double>(projectPrice);
+      map['project_price'] = Variable<int>(projectPrice);
     }
     map['expense_markup_percentage'] = Variable<double>(
       expenseMarkupPercentage,
@@ -1835,8 +1832,8 @@ class DbProject extends DataClass implements Insertable<DbProject> {
       isCompleted: serializer.fromJson<int>(json['isCompleted']),
       completionDate: serializer.fromJson<String?>(json['completionDate']),
       isInternal: serializer.fromJson<int>(json['isInternal']),
-      billedHourlyRate: serializer.fromJson<double?>(json['billedHourlyRate']),
-      projectPrice: serializer.fromJson<double?>(json['projectPrice']),
+      billedHourlyRate: serializer.fromJson<int?>(json['billedHourlyRate']),
+      projectPrice: serializer.fromJson<int?>(json['projectPrice']),
       expenseMarkupPercentage: serializer.fromJson<double>(
         json['expenseMarkupPercentage'],
       ),
@@ -1859,8 +1856,8 @@ class DbProject extends DataClass implements Insertable<DbProject> {
       'isCompleted': serializer.toJson<int>(isCompleted),
       'completionDate': serializer.toJson<String?>(completionDate),
       'isInternal': serializer.toJson<int>(isInternal),
-      'billedHourlyRate': serializer.toJson<double?>(billedHourlyRate),
-      'projectPrice': serializer.toJson<double?>(projectPrice),
+      'billedHourlyRate': serializer.toJson<int?>(billedHourlyRate),
+      'projectPrice': serializer.toJson<int?>(projectPrice),
       'expenseMarkupPercentage': serializer.toJson<double>(
         expenseMarkupPercentage,
       ),
@@ -1881,8 +1878,8 @@ class DbProject extends DataClass implements Insertable<DbProject> {
     int? isCompleted,
     Value<String?> completionDate = const Value.absent(),
     int? isInternal,
-    Value<double?> billedHourlyRate = const Value.absent(),
-    Value<double?> projectPrice = const Value.absent(),
+    Value<int?> billedHourlyRate = const Value.absent(),
+    Value<int?> projectPrice = const Value.absent(),
     double? expenseMarkupPercentage,
     double? taxRate,
     Value<int?> parentProjectId = const Value.absent(),
@@ -2032,8 +2029,8 @@ class ProjectsCompanion extends UpdateCompanion<DbProject> {
   final Value<int> isCompleted;
   final Value<String?> completionDate;
   final Value<int> isInternal;
-  final Value<double?> billedHourlyRate;
-  final Value<double?> projectPrice;
+  final Value<int?> billedHourlyRate;
+  final Value<int?> projectPrice;
   final Value<double> expenseMarkupPercentage;
   final Value<double> taxRate;
   final Value<int?> parentProjectId;
@@ -2086,8 +2083,8 @@ class ProjectsCompanion extends UpdateCompanion<DbProject> {
     Expression<int>? isCompleted,
     Expression<String>? completionDate,
     Expression<int>? isInternal,
-    Expression<double>? billedHourlyRate,
-    Expression<double>? projectPrice,
+    Expression<int>? billedHourlyRate,
+    Expression<int>? projectPrice,
     Expression<double>? expenseMarkupPercentage,
     Expression<double>? taxRate,
     Expression<int>? parentProjectId,
@@ -2125,8 +2122,8 @@ class ProjectsCompanion extends UpdateCompanion<DbProject> {
     Value<int>? isCompleted,
     Value<String?>? completionDate,
     Value<int>? isInternal,
-    Value<double?>? billedHourlyRate,
-    Value<double?>? projectPrice,
+    Value<int?>? billedHourlyRate,
+    Value<int?>? projectPrice,
     Value<double>? expenseMarkupPercentage,
     Value<double>? taxRate,
     Value<int?>? parentProjectId,
@@ -2189,10 +2186,10 @@ class ProjectsCompanion extends UpdateCompanion<DbProject> {
       map['is_internal'] = Variable<int>(isInternal.value);
     }
     if (billedHourlyRate.present) {
-      map['billed_hourly_rate'] = Variable<double>(billedHourlyRate.value);
+      map['billed_hourly_rate'] = Variable<int>(billedHourlyRate.value);
     }
     if (projectPrice.present) {
-      map['project_price'] = Variable<double>(projectPrice.value);
+      map['project_price'] = Variable<int>(projectPrice.value);
     }
     if (expenseMarkupPercentage.present) {
       map['expense_markup_percentage'] = Variable<double>(
@@ -2264,13 +2261,13 @@ class $RolesTable extends Roles with TableInfo<$RolesTable, DbRole> {
     'standardRate',
   );
   @override
-  late final GeneratedColumn<double> standardRate = GeneratedColumn<double>(
+  late final GeneratedColumn<int> standardRate = GeneratedColumn<int>(
     'standard_rate',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(0.0),
+    defaultValue: const Constant(0),
   );
   @override
   List<GeneratedColumn> get $columns => [id, name, standardRate];
@@ -2324,7 +2321,7 @@ class $RolesTable extends Roles with TableInfo<$RolesTable, DbRole> {
         data['${effectivePrefix}name'],
       )!,
       standardRate: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}standard_rate'],
       )!,
     );
@@ -2339,7 +2336,7 @@ class $RolesTable extends Roles with TableInfo<$RolesTable, DbRole> {
 class DbRole extends DataClass implements Insertable<DbRole> {
   final int id;
   final String name;
-  final double standardRate;
+  final int standardRate;
   const DbRole({
     required this.id,
     required this.name,
@@ -2350,7 +2347,7 @@ class DbRole extends DataClass implements Insertable<DbRole> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
-    map['standard_rate'] = Variable<double>(standardRate);
+    map['standard_rate'] = Variable<int>(standardRate);
     return map;
   }
 
@@ -2370,7 +2367,7 @@ class DbRole extends DataClass implements Insertable<DbRole> {
     return DbRole(
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
-      standardRate: serializer.fromJson<double>(json['standardRate']),
+      standardRate: serializer.fromJson<int>(json['standardRate']),
     );
   }
   @override
@@ -2379,11 +2376,11 @@ class DbRole extends DataClass implements Insertable<DbRole> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
-      'standardRate': serializer.toJson<double>(standardRate),
+      'standardRate': serializer.toJson<int>(standardRate),
     };
   }
 
-  DbRole copyWith({int? id, String? name, double? standardRate}) => DbRole(
+  DbRole copyWith({int? id, String? name, int? standardRate}) => DbRole(
     id: id ?? this.id,
     name: name ?? this.name,
     standardRate: standardRate ?? this.standardRate,
@@ -2422,7 +2419,7 @@ class DbRole extends DataClass implements Insertable<DbRole> {
 class RolesCompanion extends UpdateCompanion<DbRole> {
   final Value<int> id;
   final Value<String> name;
-  final Value<double> standardRate;
+  final Value<int> standardRate;
   const RolesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -2436,7 +2433,7 @@ class RolesCompanion extends UpdateCompanion<DbRole> {
   static Insertable<DbRole> custom({
     Expression<int>? id,
     Expression<String>? name,
-    Expression<double>? standardRate,
+    Expression<int>? standardRate,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2448,7 +2445,7 @@ class RolesCompanion extends UpdateCompanion<DbRole> {
   RolesCompanion copyWith({
     Value<int>? id,
     Value<String>? name,
-    Value<double>? standardRate,
+    Value<int>? standardRate,
   }) {
     return RolesCompanion(
       id: id ?? this.id,
@@ -2467,7 +2464,7 @@ class RolesCompanion extends UpdateCompanion<DbRole> {
       map['name'] = Variable<String>(name.value);
     }
     if (standardRate.present) {
-      map['standard_rate'] = Variable<double>(standardRate.value);
+      map['standard_rate'] = Variable<int>(standardRate.value);
     }
     return map;
   }
@@ -2541,11 +2538,11 @@ class $EmployeesTable extends Employees
     'hourlyRate',
   );
   @override
-  late final GeneratedColumn<double> hourlyRate = GeneratedColumn<double>(
+  late final GeneratedColumn<int> hourlyRate = GeneratedColumn<int>(
     'hourly_rate',
     aliasedName,
     true,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _isDeletedMeta = const VerificationMeta(
@@ -2645,7 +2642,7 @@ class $EmployeesTable extends Employees
         data['${effectivePrefix}title_id'],
       ),
       hourlyRate: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}hourly_rate'],
       ),
       isDeleted: attachedDatabase.typeMapping.read(
@@ -2666,7 +2663,7 @@ class DbEmployee extends DataClass implements Insertable<DbEmployee> {
   final String? employeeNumber;
   final String name;
   final int? titleId;
-  final double? hourlyRate;
+  final int? hourlyRate;
   final int isDeleted;
   const DbEmployee({
     required this.id,
@@ -2688,7 +2685,7 @@ class DbEmployee extends DataClass implements Insertable<DbEmployee> {
       map['title_id'] = Variable<int>(titleId);
     }
     if (!nullToAbsent || hourlyRate != null) {
-      map['hourly_rate'] = Variable<double>(hourlyRate);
+      map['hourly_rate'] = Variable<int>(hourlyRate);
     }
     map['is_deleted'] = Variable<int>(isDeleted);
     return map;
@@ -2721,7 +2718,7 @@ class DbEmployee extends DataClass implements Insertable<DbEmployee> {
       employeeNumber: serializer.fromJson<String?>(json['employeeNumber']),
       name: serializer.fromJson<String>(json['name']),
       titleId: serializer.fromJson<int?>(json['titleId']),
-      hourlyRate: serializer.fromJson<double?>(json['hourlyRate']),
+      hourlyRate: serializer.fromJson<int?>(json['hourlyRate']),
       isDeleted: serializer.fromJson<int>(json['isDeleted']),
     );
   }
@@ -2733,7 +2730,7 @@ class DbEmployee extends DataClass implements Insertable<DbEmployee> {
       'employeeNumber': serializer.toJson<String?>(employeeNumber),
       'name': serializer.toJson<String>(name),
       'titleId': serializer.toJson<int?>(titleId),
-      'hourlyRate': serializer.toJson<double?>(hourlyRate),
+      'hourlyRate': serializer.toJson<int?>(hourlyRate),
       'isDeleted': serializer.toJson<int>(isDeleted),
     };
   }
@@ -2743,7 +2740,7 @@ class DbEmployee extends DataClass implements Insertable<DbEmployee> {
     Value<String?> employeeNumber = const Value.absent(),
     String? name,
     Value<int?> titleId = const Value.absent(),
-    Value<double?> hourlyRate = const Value.absent(),
+    Value<int?> hourlyRate = const Value.absent(),
     int? isDeleted,
   }) => DbEmployee(
     id: id ?? this.id,
@@ -2803,7 +2800,7 @@ class EmployeesCompanion extends UpdateCompanion<DbEmployee> {
   final Value<String?> employeeNumber;
   final Value<String> name;
   final Value<int?> titleId;
-  final Value<double?> hourlyRate;
+  final Value<int?> hourlyRate;
   final Value<int> isDeleted;
   const EmployeesCompanion({
     this.id = const Value.absent(),
@@ -2826,7 +2823,7 @@ class EmployeesCompanion extends UpdateCompanion<DbEmployee> {
     Expression<String>? employeeNumber,
     Expression<String>? name,
     Expression<int>? titleId,
-    Expression<double>? hourlyRate,
+    Expression<int>? hourlyRate,
     Expression<int>? isDeleted,
   }) {
     return RawValuesInsertable({
@@ -2844,7 +2841,7 @@ class EmployeesCompanion extends UpdateCompanion<DbEmployee> {
     Value<String?>? employeeNumber,
     Value<String>? name,
     Value<int?>? titleId,
-    Value<double?>? hourlyRate,
+    Value<int?>? hourlyRate,
     Value<int>? isDeleted,
   }) {
     return EmployeesCompanion(
@@ -2873,7 +2870,7 @@ class EmployeesCompanion extends UpdateCompanion<DbEmployee> {
       map['title_id'] = Variable<int>(titleId.value);
     }
     if (hourlyRate.present) {
-      map['hourly_rate'] = Variable<double>(hourlyRate.value);
+      map['hourly_rate'] = Variable<int>(hourlyRate.value);
     }
     if (isDeleted.present) {
       map['is_deleted'] = Variable<int>(isDeleted.value);
@@ -3423,11 +3420,11 @@ class $InvoicesTable extends Invoices
     'labourSubtotal',
   );
   @override
-  late final GeneratedColumn<double> labourSubtotal = GeneratedColumn<double>(
+  late final GeneratedColumn<int> labourSubtotal = GeneratedColumn<int>(
     'labour_subtotal',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
@@ -3435,36 +3432,34 @@ class $InvoicesTable extends Invoices
     'materialsSubtotal',
   );
   @override
-  late final GeneratedColumn<double> materialsSubtotal =
-      GeneratedColumn<double>(
-        'materials_subtotal',
-        aliasedName,
-        false,
-        type: DriftSqlType.double,
-        requiredDuringInsert: false,
-        defaultValue: const Constant(0),
-      );
+  late final GeneratedColumn<int> materialsSubtotal = GeneratedColumn<int>(
+    'materials_subtotal',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _materialsPickupCostMeta =
       const VerificationMeta('materialsPickupCost');
   @override
-  late final GeneratedColumn<double> materialsPickupCost =
-      GeneratedColumn<double>(
-        'materials_pickup_cost',
-        aliasedName,
-        false,
-        type: DriftSqlType.double,
-        requiredDuringInsert: false,
-        defaultValue: const Constant(0),
-      );
+  late final GeneratedColumn<int> materialsPickupCost = GeneratedColumn<int>(
+    'materials_pickup_cost',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _otherCostsMeta = const VerificationMeta(
     'otherCosts',
   );
   @override
-  late final GeneratedColumn<double> otherCosts = GeneratedColumn<double>(
+  late final GeneratedColumn<int> otherCosts = GeneratedColumn<int>(
     'other_costs',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
@@ -3483,11 +3478,11 @@ class $InvoicesTable extends Invoices
     'discountAmount',
   );
   @override
-  late final GeneratedColumn<double> discountAmount = GeneratedColumn<double>(
+  late final GeneratedColumn<int> discountAmount = GeneratedColumn<int>(
     'discount_amount',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
@@ -3540,11 +3535,11 @@ class $InvoicesTable extends Invoices
     'tax1Amount',
   );
   @override
-  late final GeneratedColumn<double> tax1Amount = GeneratedColumn<double>(
+  late final GeneratedColumn<int> tax1Amount = GeneratedColumn<int>(
     'tax1_amount',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
@@ -3585,11 +3580,11 @@ class $InvoicesTable extends Invoices
     'tax2Amount',
   );
   @override
-  late final GeneratedColumn<double> tax2Amount = GeneratedColumn<double>(
+  late final GeneratedColumn<int> tax2Amount = GeneratedColumn<int>(
     'tax2_amount',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
@@ -3608,11 +3603,11 @@ class $InvoicesTable extends Invoices
     'subtotal',
   );
   @override
-  late final GeneratedColumn<double> subtotal = GeneratedColumn<double>(
+  late final GeneratedColumn<int> subtotal = GeneratedColumn<int>(
     'subtotal',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
@@ -3620,11 +3615,11 @@ class $InvoicesTable extends Invoices
     'totalAmount',
   );
   @override
-  late final GeneratedColumn<double> totalAmount = GeneratedColumn<double>(
+  late final GeneratedColumn<int> totalAmount = GeneratedColumn<int>(
     'total_amount',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
@@ -3663,11 +3658,11 @@ class $InvoicesTable extends Invoices
     'amountPaid',
   );
   @override
-  late final GeneratedColumn<double> amountPaid = GeneratedColumn<double>(
+  late final GeneratedColumn<int> amountPaid = GeneratedColumn<int>(
     'amount_paid',
     aliasedName,
     true,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _paymentDateMeta = const VerificationMeta(
@@ -4246,19 +4241,19 @@ class $InvoicesTable extends Invoices
         data['${effectivePrefix}project_address'],
       ),
       labourSubtotal: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}labour_subtotal'],
       )!,
       materialsSubtotal: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}materials_subtotal'],
       )!,
       materialsPickupCost: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}materials_pickup_cost'],
       )!,
       otherCosts: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}other_costs'],
       )!,
       otherCostsDescription: attachedDatabase.typeMapping.read(
@@ -4266,7 +4261,7 @@ class $InvoicesTable extends Invoices
         data['${effectivePrefix}other_costs_description'],
       ),
       discountAmount: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}discount_amount'],
       )!,
       discountDescription: attachedDatabase.typeMapping.read(
@@ -4286,7 +4281,7 @@ class $InvoicesTable extends Invoices
         data['${effectivePrefix}tax1_rate'],
       ),
       tax1Amount: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}tax1_amount'],
       )!,
       tax1RegistrationNumber: attachedDatabase.typeMapping.read(
@@ -4302,7 +4297,7 @@ class $InvoicesTable extends Invoices
         data['${effectivePrefix}tax2_rate'],
       ),
       tax2Amount: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}tax2_amount'],
       )!,
       tax2RegistrationNumber: attachedDatabase.typeMapping.read(
@@ -4310,11 +4305,11 @@ class $InvoicesTable extends Invoices
         data['${effectivePrefix}tax2_registration_number'],
       ),
       subtotal: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}subtotal'],
       )!,
       totalAmount: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}total_amount'],
       )!,
       terms: attachedDatabase.typeMapping.read(
@@ -4330,7 +4325,7 @@ class $InvoicesTable extends Invoices
         data['${effectivePrefix}is_paid'],
       )!,
       amountPaid: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}amount_paid'],
       ),
       paymentDate: attachedDatabase.typeMapping.read(
@@ -4405,28 +4400,28 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
   final int clientId;
   final int projectId;
   final String? projectAddress;
-  final double labourSubtotal;
-  final double materialsSubtotal;
-  final double materialsPickupCost;
-  final double otherCosts;
+  final int labourSubtotal;
+  final int materialsSubtotal;
+  final int materialsPickupCost;
+  final int otherCosts;
   final String? otherCostsDescription;
-  final double discountAmount;
+  final int discountAmount;
   final String? discountDescription;
   final double discountPercent;
   final String? tax1Name;
   final double? tax1Rate;
-  final double tax1Amount;
+  final int tax1Amount;
   final String? tax1RegistrationNumber;
   final String? tax2Name;
   final double? tax2Rate;
-  final double tax2Amount;
+  final int tax2Amount;
   final String? tax2RegistrationNumber;
-  final double subtotal;
-  final double totalAmount;
+  final int subtotal;
+  final int totalAmount;
   final String terms;
   final String? poNumber;
   final int isPaid;
-  final double? amountPaid;
+  final int? amountPaid;
   final String? paymentDate;
   final String? paymentMethod;
   final String? paymentReference;
@@ -4496,14 +4491,14 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
     if (!nullToAbsent || projectAddress != null) {
       map['project_address'] = Variable<String>(projectAddress);
     }
-    map['labour_subtotal'] = Variable<double>(labourSubtotal);
-    map['materials_subtotal'] = Variable<double>(materialsSubtotal);
-    map['materials_pickup_cost'] = Variable<double>(materialsPickupCost);
-    map['other_costs'] = Variable<double>(otherCosts);
+    map['labour_subtotal'] = Variable<int>(labourSubtotal);
+    map['materials_subtotal'] = Variable<int>(materialsSubtotal);
+    map['materials_pickup_cost'] = Variable<int>(materialsPickupCost);
+    map['other_costs'] = Variable<int>(otherCosts);
     if (!nullToAbsent || otherCostsDescription != null) {
       map['other_costs_description'] = Variable<String>(otherCostsDescription);
     }
-    map['discount_amount'] = Variable<double>(discountAmount);
+    map['discount_amount'] = Variable<int>(discountAmount);
     if (!nullToAbsent || discountDescription != null) {
       map['discount_description'] = Variable<String>(discountDescription);
     }
@@ -4514,7 +4509,7 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
     if (!nullToAbsent || tax1Rate != null) {
       map['tax1_rate'] = Variable<double>(tax1Rate);
     }
-    map['tax1_amount'] = Variable<double>(tax1Amount);
+    map['tax1_amount'] = Variable<int>(tax1Amount);
     if (!nullToAbsent || tax1RegistrationNumber != null) {
       map['tax1_registration_number'] = Variable<String>(
         tax1RegistrationNumber,
@@ -4526,21 +4521,21 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
     if (!nullToAbsent || tax2Rate != null) {
       map['tax2_rate'] = Variable<double>(tax2Rate);
     }
-    map['tax2_amount'] = Variable<double>(tax2Amount);
+    map['tax2_amount'] = Variable<int>(tax2Amount);
     if (!nullToAbsent || tax2RegistrationNumber != null) {
       map['tax2_registration_number'] = Variable<String>(
         tax2RegistrationNumber,
       );
     }
-    map['subtotal'] = Variable<double>(subtotal);
-    map['total_amount'] = Variable<double>(totalAmount);
+    map['subtotal'] = Variable<int>(subtotal);
+    map['total_amount'] = Variable<int>(totalAmount);
     map['terms'] = Variable<String>(terms);
     if (!nullToAbsent || poNumber != null) {
       map['po_number'] = Variable<String>(poNumber);
     }
     map['is_paid'] = Variable<int>(isPaid);
     if (!nullToAbsent || amountPaid != null) {
-      map['amount_paid'] = Variable<double>(amountPaid);
+      map['amount_paid'] = Variable<int>(amountPaid);
     }
     if (!nullToAbsent || paymentDate != null) {
       map['payment_date'] = Variable<String>(paymentDate);
@@ -4684,38 +4679,38 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
       clientId: serializer.fromJson<int>(json['clientId']),
       projectId: serializer.fromJson<int>(json['projectId']),
       projectAddress: serializer.fromJson<String?>(json['projectAddress']),
-      labourSubtotal: serializer.fromJson<double>(json['labourSubtotal']),
-      materialsSubtotal: serializer.fromJson<double>(json['materialsSubtotal']),
-      materialsPickupCost: serializer.fromJson<double>(
+      labourSubtotal: serializer.fromJson<int>(json['labourSubtotal']),
+      materialsSubtotal: serializer.fromJson<int>(json['materialsSubtotal']),
+      materialsPickupCost: serializer.fromJson<int>(
         json['materialsPickupCost'],
       ),
-      otherCosts: serializer.fromJson<double>(json['otherCosts']),
+      otherCosts: serializer.fromJson<int>(json['otherCosts']),
       otherCostsDescription: serializer.fromJson<String?>(
         json['otherCostsDescription'],
       ),
-      discountAmount: serializer.fromJson<double>(json['discountAmount']),
+      discountAmount: serializer.fromJson<int>(json['discountAmount']),
       discountDescription: serializer.fromJson<String?>(
         json['discountDescription'],
       ),
       discountPercent: serializer.fromJson<double>(json['discountPercent']),
       tax1Name: serializer.fromJson<String?>(json['tax1Name']),
       tax1Rate: serializer.fromJson<double?>(json['tax1Rate']),
-      tax1Amount: serializer.fromJson<double>(json['tax1Amount']),
+      tax1Amount: serializer.fromJson<int>(json['tax1Amount']),
       tax1RegistrationNumber: serializer.fromJson<String?>(
         json['tax1RegistrationNumber'],
       ),
       tax2Name: serializer.fromJson<String?>(json['tax2Name']),
       tax2Rate: serializer.fromJson<double?>(json['tax2Rate']),
-      tax2Amount: serializer.fromJson<double>(json['tax2Amount']),
+      tax2Amount: serializer.fromJson<int>(json['tax2Amount']),
       tax2RegistrationNumber: serializer.fromJson<String?>(
         json['tax2RegistrationNumber'],
       ),
-      subtotal: serializer.fromJson<double>(json['subtotal']),
-      totalAmount: serializer.fromJson<double>(json['totalAmount']),
+      subtotal: serializer.fromJson<int>(json['subtotal']),
+      totalAmount: serializer.fromJson<int>(json['totalAmount']),
       terms: serializer.fromJson<String>(json['terms']),
       poNumber: serializer.fromJson<String?>(json['poNumber']),
       isPaid: serializer.fromJson<int>(json['isPaid']),
-      amountPaid: serializer.fromJson<double?>(json['amountPaid']),
+      amountPaid: serializer.fromJson<int?>(json['amountPaid']),
       paymentDate: serializer.fromJson<String?>(json['paymentDate']),
       paymentMethod: serializer.fromJson<String?>(json['paymentMethod']),
       paymentReference: serializer.fromJson<String?>(json['paymentReference']),
@@ -4746,34 +4741,34 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
       'clientId': serializer.toJson<int>(clientId),
       'projectId': serializer.toJson<int>(projectId),
       'projectAddress': serializer.toJson<String?>(projectAddress),
-      'labourSubtotal': serializer.toJson<double>(labourSubtotal),
-      'materialsSubtotal': serializer.toJson<double>(materialsSubtotal),
-      'materialsPickupCost': serializer.toJson<double>(materialsPickupCost),
-      'otherCosts': serializer.toJson<double>(otherCosts),
+      'labourSubtotal': serializer.toJson<int>(labourSubtotal),
+      'materialsSubtotal': serializer.toJson<int>(materialsSubtotal),
+      'materialsPickupCost': serializer.toJson<int>(materialsPickupCost),
+      'otherCosts': serializer.toJson<int>(otherCosts),
       'otherCostsDescription': serializer.toJson<String?>(
         otherCostsDescription,
       ),
-      'discountAmount': serializer.toJson<double>(discountAmount),
+      'discountAmount': serializer.toJson<int>(discountAmount),
       'discountDescription': serializer.toJson<String?>(discountDescription),
       'discountPercent': serializer.toJson<double>(discountPercent),
       'tax1Name': serializer.toJson<String?>(tax1Name),
       'tax1Rate': serializer.toJson<double?>(tax1Rate),
-      'tax1Amount': serializer.toJson<double>(tax1Amount),
+      'tax1Amount': serializer.toJson<int>(tax1Amount),
       'tax1RegistrationNumber': serializer.toJson<String?>(
         tax1RegistrationNumber,
       ),
       'tax2Name': serializer.toJson<String?>(tax2Name),
       'tax2Rate': serializer.toJson<double?>(tax2Rate),
-      'tax2Amount': serializer.toJson<double>(tax2Amount),
+      'tax2Amount': serializer.toJson<int>(tax2Amount),
       'tax2RegistrationNumber': serializer.toJson<String?>(
         tax2RegistrationNumber,
       ),
-      'subtotal': serializer.toJson<double>(subtotal),
-      'totalAmount': serializer.toJson<double>(totalAmount),
+      'subtotal': serializer.toJson<int>(subtotal),
+      'totalAmount': serializer.toJson<int>(totalAmount),
       'terms': serializer.toJson<String>(terms),
       'poNumber': serializer.toJson<String?>(poNumber),
       'isPaid': serializer.toJson<int>(isPaid),
-      'amountPaid': serializer.toJson<double?>(amountPaid),
+      'amountPaid': serializer.toJson<int?>(amountPaid),
       'paymentDate': serializer.toJson<String?>(paymentDate),
       'paymentMethod': serializer.toJson<String?>(paymentMethod),
       'paymentReference': serializer.toJson<String?>(paymentReference),
@@ -4798,28 +4793,28 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
     int? clientId,
     int? projectId,
     Value<String?> projectAddress = const Value.absent(),
-    double? labourSubtotal,
-    double? materialsSubtotal,
-    double? materialsPickupCost,
-    double? otherCosts,
+    int? labourSubtotal,
+    int? materialsSubtotal,
+    int? materialsPickupCost,
+    int? otherCosts,
     Value<String?> otherCostsDescription = const Value.absent(),
-    double? discountAmount,
+    int? discountAmount,
     Value<String?> discountDescription = const Value.absent(),
     double? discountPercent,
     Value<String?> tax1Name = const Value.absent(),
     Value<double?> tax1Rate = const Value.absent(),
-    double? tax1Amount,
+    int? tax1Amount,
     Value<String?> tax1RegistrationNumber = const Value.absent(),
     Value<String?> tax2Name = const Value.absent(),
     Value<double?> tax2Rate = const Value.absent(),
-    double? tax2Amount,
+    int? tax2Amount,
     Value<String?> tax2RegistrationNumber = const Value.absent(),
-    double? subtotal,
-    double? totalAmount,
+    int? subtotal,
+    int? totalAmount,
     String? terms,
     Value<String?> poNumber = const Value.absent(),
     int? isPaid,
-    Value<double?> amountPaid = const Value.absent(),
+    Value<int?> amountPaid = const Value.absent(),
     Value<String?> paymentDate = const Value.absent(),
     Value<String?> paymentMethod = const Value.absent(),
     Value<String?> paymentReference = const Value.absent(),
@@ -5152,28 +5147,28 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
   final Value<int> clientId;
   final Value<int> projectId;
   final Value<String?> projectAddress;
-  final Value<double> labourSubtotal;
-  final Value<double> materialsSubtotal;
-  final Value<double> materialsPickupCost;
-  final Value<double> otherCosts;
+  final Value<int> labourSubtotal;
+  final Value<int> materialsSubtotal;
+  final Value<int> materialsPickupCost;
+  final Value<int> otherCosts;
   final Value<String?> otherCostsDescription;
-  final Value<double> discountAmount;
+  final Value<int> discountAmount;
   final Value<String?> discountDescription;
   final Value<double> discountPercent;
   final Value<String?> tax1Name;
   final Value<double?> tax1Rate;
-  final Value<double> tax1Amount;
+  final Value<int> tax1Amount;
   final Value<String?> tax1RegistrationNumber;
   final Value<String?> tax2Name;
   final Value<double?> tax2Rate;
-  final Value<double> tax2Amount;
+  final Value<int> tax2Amount;
   final Value<String?> tax2RegistrationNumber;
-  final Value<double> subtotal;
-  final Value<double> totalAmount;
+  final Value<int> subtotal;
+  final Value<int> totalAmount;
   final Value<String> terms;
   final Value<String?> poNumber;
   final Value<int> isPaid;
-  final Value<double?> amountPaid;
+  final Value<int?> amountPaid;
   final Value<String?> paymentDate;
   final Value<String?> paymentMethod;
   final Value<String?> paymentReference;
@@ -5286,28 +5281,28 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
     Expression<int>? clientId,
     Expression<int>? projectId,
     Expression<String>? projectAddress,
-    Expression<double>? labourSubtotal,
-    Expression<double>? materialsSubtotal,
-    Expression<double>? materialsPickupCost,
-    Expression<double>? otherCosts,
+    Expression<int>? labourSubtotal,
+    Expression<int>? materialsSubtotal,
+    Expression<int>? materialsPickupCost,
+    Expression<int>? otherCosts,
     Expression<String>? otherCostsDescription,
-    Expression<double>? discountAmount,
+    Expression<int>? discountAmount,
     Expression<String>? discountDescription,
     Expression<double>? discountPercent,
     Expression<String>? tax1Name,
     Expression<double>? tax1Rate,
-    Expression<double>? tax1Amount,
+    Expression<int>? tax1Amount,
     Expression<String>? tax1RegistrationNumber,
     Expression<String>? tax2Name,
     Expression<double>? tax2Rate,
-    Expression<double>? tax2Amount,
+    Expression<int>? tax2Amount,
     Expression<String>? tax2RegistrationNumber,
-    Expression<double>? subtotal,
-    Expression<double>? totalAmount,
+    Expression<int>? subtotal,
+    Expression<int>? totalAmount,
     Expression<String>? terms,
     Expression<String>? poNumber,
     Expression<int>? isPaid,
-    Expression<double>? amountPaid,
+    Expression<int>? amountPaid,
     Expression<String>? paymentDate,
     Expression<String>? paymentMethod,
     Expression<String>? paymentReference,
@@ -5382,28 +5377,28 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
     Value<int>? clientId,
     Value<int>? projectId,
     Value<String?>? projectAddress,
-    Value<double>? labourSubtotal,
-    Value<double>? materialsSubtotal,
-    Value<double>? materialsPickupCost,
-    Value<double>? otherCosts,
+    Value<int>? labourSubtotal,
+    Value<int>? materialsSubtotal,
+    Value<int>? materialsPickupCost,
+    Value<int>? otherCosts,
     Value<String?>? otherCostsDescription,
-    Value<double>? discountAmount,
+    Value<int>? discountAmount,
     Value<String?>? discountDescription,
     Value<double>? discountPercent,
     Value<String?>? tax1Name,
     Value<double?>? tax1Rate,
-    Value<double>? tax1Amount,
+    Value<int>? tax1Amount,
     Value<String?>? tax1RegistrationNumber,
     Value<String?>? tax2Name,
     Value<double?>? tax2Rate,
-    Value<double>? tax2Amount,
+    Value<int>? tax2Amount,
     Value<String?>? tax2RegistrationNumber,
-    Value<double>? subtotal,
-    Value<double>? totalAmount,
+    Value<int>? subtotal,
+    Value<int>? totalAmount,
     Value<String>? terms,
     Value<String?>? poNumber,
     Value<int>? isPaid,
-    Value<double?>? amountPaid,
+    Value<int?>? amountPaid,
     Value<String?>? paymentDate,
     Value<String?>? paymentMethod,
     Value<String?>? paymentReference,
@@ -5491,18 +5486,16 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
       map['project_address'] = Variable<String>(projectAddress.value);
     }
     if (labourSubtotal.present) {
-      map['labour_subtotal'] = Variable<double>(labourSubtotal.value);
+      map['labour_subtotal'] = Variable<int>(labourSubtotal.value);
     }
     if (materialsSubtotal.present) {
-      map['materials_subtotal'] = Variable<double>(materialsSubtotal.value);
+      map['materials_subtotal'] = Variable<int>(materialsSubtotal.value);
     }
     if (materialsPickupCost.present) {
-      map['materials_pickup_cost'] = Variable<double>(
-        materialsPickupCost.value,
-      );
+      map['materials_pickup_cost'] = Variable<int>(materialsPickupCost.value);
     }
     if (otherCosts.present) {
-      map['other_costs'] = Variable<double>(otherCosts.value);
+      map['other_costs'] = Variable<int>(otherCosts.value);
     }
     if (otherCostsDescription.present) {
       map['other_costs_description'] = Variable<String>(
@@ -5510,7 +5503,7 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
       );
     }
     if (discountAmount.present) {
-      map['discount_amount'] = Variable<double>(discountAmount.value);
+      map['discount_amount'] = Variable<int>(discountAmount.value);
     }
     if (discountDescription.present) {
       map['discount_description'] = Variable<String>(discountDescription.value);
@@ -5525,7 +5518,7 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
       map['tax1_rate'] = Variable<double>(tax1Rate.value);
     }
     if (tax1Amount.present) {
-      map['tax1_amount'] = Variable<double>(tax1Amount.value);
+      map['tax1_amount'] = Variable<int>(tax1Amount.value);
     }
     if (tax1RegistrationNumber.present) {
       map['tax1_registration_number'] = Variable<String>(
@@ -5539,7 +5532,7 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
       map['tax2_rate'] = Variable<double>(tax2Rate.value);
     }
     if (tax2Amount.present) {
-      map['tax2_amount'] = Variable<double>(tax2Amount.value);
+      map['tax2_amount'] = Variable<int>(tax2Amount.value);
     }
     if (tax2RegistrationNumber.present) {
       map['tax2_registration_number'] = Variable<String>(
@@ -5547,10 +5540,10 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
       );
     }
     if (subtotal.present) {
-      map['subtotal'] = Variable<double>(subtotal.value);
+      map['subtotal'] = Variable<int>(subtotal.value);
     }
     if (totalAmount.present) {
-      map['total_amount'] = Variable<double>(totalAmount.value);
+      map['total_amount'] = Variable<int>(totalAmount.value);
     }
     if (terms.present) {
       map['terms'] = Variable<String>(terms.value);
@@ -5562,7 +5555,7 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
       map['is_paid'] = Variable<int>(isPaid.value);
     }
     if (amountPaid.present) {
-      map['amount_paid'] = Variable<double>(amountPaid.value);
+      map['amount_paid'] = Variable<int>(amountPaid.value);
     }
     if (paymentDate.present) {
       map['payment_date'] = Variable<String>(paymentDate.value);
@@ -5757,11 +5750,11 @@ class $TimeEntriesTable extends TimeEntries
     'hourlyRate',
   );
   @override
-  late final GeneratedColumn<double> hourlyRate = GeneratedColumn<double>(
+  late final GeneratedColumn<int> hourlyRate = GeneratedColumn<int>(
     'hourly_rate',
     aliasedName,
     true,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
   static const VerificationMeta _isPausedMeta = const VerificationMeta(
@@ -6024,7 +6017,7 @@ class $TimeEntriesTable extends TimeEntries
         data['${effectivePrefix}final_billed_duration_seconds'],
       ),
       hourlyRate: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}hourly_rate'],
       ),
       isPaused: attachedDatabase.typeMapping.read(
@@ -6072,7 +6065,7 @@ class DbTimeEntry extends DataClass implements Insertable<DbTimeEntry> {
   final String? endTime;
   final double pausedDuration;
   final double? finalBilledDurationSeconds;
-  final double? hourlyRate;
+  final int? hourlyRate;
   final int isPaused;
   final String? pauseStartTime;
   final int isDeleted;
@@ -6116,7 +6109,7 @@ class DbTimeEntry extends DataClass implements Insertable<DbTimeEntry> {
       );
     }
     if (!nullToAbsent || hourlyRate != null) {
-      map['hourly_rate'] = Variable<double>(hourlyRate);
+      map['hourly_rate'] = Variable<int>(hourlyRate);
     }
     map['is_paused'] = Variable<int>(isPaused);
     if (!nullToAbsent || pauseStartTime != null) {
@@ -6188,7 +6181,7 @@ class DbTimeEntry extends DataClass implements Insertable<DbTimeEntry> {
       finalBilledDurationSeconds: serializer.fromJson<double?>(
         json['finalBilledDurationSeconds'],
       ),
-      hourlyRate: serializer.fromJson<double?>(json['hourlyRate']),
+      hourlyRate: serializer.fromJson<int?>(json['hourlyRate']),
       isPaused: serializer.fromJson<int>(json['isPaused']),
       pauseStartTime: serializer.fromJson<String?>(json['pauseStartTime']),
       isDeleted: serializer.fromJson<int>(json['isDeleted']),
@@ -6211,7 +6204,7 @@ class DbTimeEntry extends DataClass implements Insertable<DbTimeEntry> {
       'finalBilledDurationSeconds': serializer.toJson<double?>(
         finalBilledDurationSeconds,
       ),
-      'hourlyRate': serializer.toJson<double?>(hourlyRate),
+      'hourlyRate': serializer.toJson<int?>(hourlyRate),
       'isPaused': serializer.toJson<int>(isPaused),
       'pauseStartTime': serializer.toJson<String?>(pauseStartTime),
       'isDeleted': serializer.toJson<int>(isDeleted),
@@ -6230,7 +6223,7 @@ class DbTimeEntry extends DataClass implements Insertable<DbTimeEntry> {
     Value<String?> endTime = const Value.absent(),
     double? pausedDuration,
     Value<double?> finalBilledDurationSeconds = const Value.absent(),
-    Value<double?> hourlyRate = const Value.absent(),
+    Value<int?> hourlyRate = const Value.absent(),
     int? isPaused,
     Value<String?> pauseStartTime = const Value.absent(),
     int? isDeleted,
@@ -6362,7 +6355,7 @@ class TimeEntriesCompanion extends UpdateCompanion<DbTimeEntry> {
   final Value<String?> endTime;
   final Value<double> pausedDuration;
   final Value<double?> finalBilledDurationSeconds;
-  final Value<double?> hourlyRate;
+  final Value<int?> hourlyRate;
   final Value<int> isPaused;
   final Value<String?> pauseStartTime;
   final Value<int> isDeleted;
@@ -6413,7 +6406,7 @@ class TimeEntriesCompanion extends UpdateCompanion<DbTimeEntry> {
     Expression<String>? endTime,
     Expression<double>? pausedDuration,
     Expression<double>? finalBilledDurationSeconds,
-    Expression<double>? hourlyRate,
+    Expression<int>? hourlyRate,
     Expression<int>? isPaused,
     Expression<String>? pauseStartTime,
     Expression<int>? isDeleted,
@@ -6450,7 +6443,7 @@ class TimeEntriesCompanion extends UpdateCompanion<DbTimeEntry> {
     Value<String?>? endTime,
     Value<double>? pausedDuration,
     Value<double?>? finalBilledDurationSeconds,
-    Value<double?>? hourlyRate,
+    Value<int?>? hourlyRate,
     Value<int>? isPaused,
     Value<String?>? pauseStartTime,
     Value<int>? isDeleted,
@@ -6506,7 +6499,7 @@ class TimeEntriesCompanion extends UpdateCompanion<DbTimeEntry> {
       );
     }
     if (hourlyRate.present) {
-      map['hourly_rate'] = Variable<double>(hourlyRate.value);
+      map['hourly_rate'] = Variable<int>(hourlyRate.value);
     }
     if (isPaused.present) {
       map['is_paused'] = Variable<int>(isPaused.value);
@@ -6601,11 +6594,11 @@ class $MaterialsTable extends Materials
   );
   static const VerificationMeta _costMeta = const VerificationMeta('cost');
   @override
-  late final GeneratedColumn<double> cost = GeneratedColumn<double>(
+  late final GeneratedColumn<int> cost = GeneratedColumn<int>(
     'cost',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _purchaseDateMeta = const VerificationMeta(
@@ -6962,7 +6955,7 @@ class $MaterialsTable extends Materials
         data['${effectivePrefix}item_name'],
       )!,
       cost: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}cost'],
       )!,
       purchaseDate: attachedDatabase.typeMapping.read(
@@ -7034,7 +7027,7 @@ class DbMaterial extends DataClass implements Insertable<DbMaterial> {
   final int id;
   final int projectId;
   final String itemName;
-  final double cost;
+  final int cost;
   final String? purchaseDate;
   final String? description;
   final int isDeleted;
@@ -7075,7 +7068,7 @@ class DbMaterial extends DataClass implements Insertable<DbMaterial> {
     map['id'] = Variable<int>(id);
     map['project_id'] = Variable<int>(projectId);
     map['item_name'] = Variable<String>(itemName);
-    map['cost'] = Variable<double>(cost);
+    map['cost'] = Variable<int>(cost);
     if (!nullToAbsent || purchaseDate != null) {
       map['purchase_date'] = Variable<String>(purchaseDate);
     }
@@ -7167,7 +7160,7 @@ class DbMaterial extends DataClass implements Insertable<DbMaterial> {
       id: serializer.fromJson<int>(json['id']),
       projectId: serializer.fromJson<int>(json['projectId']),
       itemName: serializer.fromJson<String>(json['itemName']),
-      cost: serializer.fromJson<double>(json['cost']),
+      cost: serializer.fromJson<int>(json['cost']),
       purchaseDate: serializer.fromJson<String?>(json['purchaseDate']),
       description: serializer.fromJson<String?>(json['description']),
       isDeleted: serializer.fromJson<int>(json['isDeleted']),
@@ -7193,7 +7186,7 @@ class DbMaterial extends DataClass implements Insertable<DbMaterial> {
       'id': serializer.toJson<int>(id),
       'projectId': serializer.toJson<int>(projectId),
       'itemName': serializer.toJson<String>(itemName),
-      'cost': serializer.toJson<double>(cost),
+      'cost': serializer.toJson<int>(cost),
       'purchaseDate': serializer.toJson<String?>(purchaseDate),
       'description': serializer.toJson<String?>(description),
       'isDeleted': serializer.toJson<int>(isDeleted),
@@ -7215,7 +7208,7 @@ class DbMaterial extends DataClass implements Insertable<DbMaterial> {
     int? id,
     int? projectId,
     String? itemName,
-    double? cost,
+    int? cost,
     Value<String?> purchaseDate = const Value.absent(),
     Value<String?> description = const Value.absent(),
     int? isDeleted,
@@ -7373,7 +7366,7 @@ class MaterialsCompanion extends UpdateCompanion<DbMaterial> {
   final Value<int> id;
   final Value<int> projectId;
   final Value<String> itemName;
-  final Value<double> cost;
+  final Value<int> cost;
   final Value<String?> purchaseDate;
   final Value<String?> description;
   final Value<int> isDeleted;
@@ -7412,7 +7405,7 @@ class MaterialsCompanion extends UpdateCompanion<DbMaterial> {
     this.id = const Value.absent(),
     required int projectId,
     required String itemName,
-    required double cost,
+    required int cost,
     this.purchaseDate = const Value.absent(),
     this.description = const Value.absent(),
     this.isDeleted = const Value.absent(),
@@ -7434,7 +7427,7 @@ class MaterialsCompanion extends UpdateCompanion<DbMaterial> {
     Expression<int>? id,
     Expression<int>? projectId,
     Expression<String>? itemName,
-    Expression<double>? cost,
+    Expression<int>? cost,
     Expression<String>? purchaseDate,
     Expression<String>? description,
     Expression<int>? isDeleted,
@@ -7476,7 +7469,7 @@ class MaterialsCompanion extends UpdateCompanion<DbMaterial> {
     Value<int>? id,
     Value<int>? projectId,
     Value<String>? itemName,
-    Value<double>? cost,
+    Value<int>? cost,
     Value<String?>? purchaseDate,
     Value<String?>? description,
     Value<int>? isDeleted,
@@ -7527,7 +7520,7 @@ class MaterialsCompanion extends UpdateCompanion<DbMaterial> {
       map['item_name'] = Variable<String>(itemName.value);
     }
     if (cost.present) {
-      map['cost'] = Variable<double>(cost.value);
+      map['cost'] = Variable<int>(cost.value);
     }
     if (purchaseDate.present) {
       map['purchase_date'] = Variable<String>(purchaseDate.value);
@@ -8971,11 +8964,11 @@ class $WorkerPaymentsTable extends WorkerPayments
   );
   static const VerificationMeta _amountMeta = const VerificationMeta('amount');
   @override
-  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
     'amount',
     aliasedName,
     false,
-    type: DriftSqlType.double,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
@@ -9085,7 +9078,7 @@ class $WorkerPaymentsTable extends WorkerPayments
         data['${effectivePrefix}payment_date'],
       )!,
       amount: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
+        DriftSqlType.int,
         data['${effectivePrefix}amount'],
       )!,
       note: attachedDatabase.typeMapping.read(
@@ -9109,7 +9102,7 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
   final int id;
   final int employeeId;
   final String paymentDate;
-  final double amount;
+  final int amount;
   final String? note;
   final String createdAt;
   const DbWorkerPayment({
@@ -9126,7 +9119,7 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
     map['id'] = Variable<int>(id);
     map['employee_id'] = Variable<int>(employeeId);
     map['payment_date'] = Variable<String>(paymentDate);
-    map['amount'] = Variable<double>(amount);
+    map['amount'] = Variable<int>(amount);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
@@ -9154,7 +9147,7 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
       id: serializer.fromJson<int>(json['id']),
       employeeId: serializer.fromJson<int>(json['employeeId']),
       paymentDate: serializer.fromJson<String>(json['paymentDate']),
-      amount: serializer.fromJson<double>(json['amount']),
+      amount: serializer.fromJson<int>(json['amount']),
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
     );
@@ -9166,7 +9159,7 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
       'id': serializer.toJson<int>(id),
       'employeeId': serializer.toJson<int>(employeeId),
       'paymentDate': serializer.toJson<String>(paymentDate),
-      'amount': serializer.toJson<double>(amount),
+      'amount': serializer.toJson<int>(amount),
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<String>(createdAt),
     };
@@ -9176,7 +9169,7 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
     int? id,
     int? employeeId,
     String? paymentDate,
-    double? amount,
+    int? amount,
     Value<String?> note = const Value.absent(),
     String? createdAt,
   }) => DbWorkerPayment(
@@ -9234,7 +9227,7 @@ class WorkerPaymentsCompanion extends UpdateCompanion<DbWorkerPayment> {
   final Value<int> id;
   final Value<int> employeeId;
   final Value<String> paymentDate;
-  final Value<double> amount;
+  final Value<int> amount;
   final Value<String?> note;
   final Value<String> createdAt;
   const WorkerPaymentsCompanion({
@@ -9249,7 +9242,7 @@ class WorkerPaymentsCompanion extends UpdateCompanion<DbWorkerPayment> {
     this.id = const Value.absent(),
     required int employeeId,
     required String paymentDate,
-    required double amount,
+    required int amount,
     this.note = const Value.absent(),
     required String createdAt,
   }) : employeeId = Value(employeeId),
@@ -9260,7 +9253,7 @@ class WorkerPaymentsCompanion extends UpdateCompanion<DbWorkerPayment> {
     Expression<int>? id,
     Expression<int>? employeeId,
     Expression<String>? paymentDate,
-    Expression<double>? amount,
+    Expression<int>? amount,
     Expression<String>? note,
     Expression<String>? createdAt,
   }) {
@@ -9278,7 +9271,7 @@ class WorkerPaymentsCompanion extends UpdateCompanion<DbWorkerPayment> {
     Value<int>? id,
     Value<int>? employeeId,
     Value<String>? paymentDate,
-    Value<double>? amount,
+    Value<int>? amount,
     Value<String?>? note,
     Value<String>? createdAt,
   }) {
@@ -9305,7 +9298,7 @@ class WorkerPaymentsCompanion extends UpdateCompanion<DbWorkerPayment> {
       map['payment_date'] = Variable<String>(paymentDate.value);
     }
     if (amount.present) {
-      map['amount'] = Variable<double>(amount.value);
+      map['amount'] = Variable<int>(amount.value);
     }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
@@ -9394,7 +9387,7 @@ typedef $$SettingsTableCreateCompanionBuilder =
       Value<int?> nextEmployeeNumber,
       Value<String?> vehicleDesignations,
       Value<String?> vendors,
-      Value<double?> companyHourlyRate,
+      Value<int?> companyHourlyRate,
       Value<double?> burdenRate,
       Value<int?> timeRoundingInterval,
       Value<int?> autoBackupReminderFrequency,
@@ -9411,7 +9404,7 @@ typedef $$SettingsTableUpdateCompanionBuilder =
       Value<int?> nextEmployeeNumber,
       Value<String?> vehicleDesignations,
       Value<String?> vendors,
-      Value<double?> companyHourlyRate,
+      Value<int?> companyHourlyRate,
       Value<double?> burdenRate,
       Value<int?> timeRoundingInterval,
       Value<int?> autoBackupReminderFrequency,
@@ -9456,7 +9449,7 @@ class $$SettingsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get companyHourlyRate => $composableBuilder(
+  ColumnFilters<int> get companyHourlyRate => $composableBuilder(
     column: $table.companyHourlyRate,
     builder: (column) => ColumnFilters(column),
   );
@@ -9536,7 +9529,7 @@ class $$SettingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get companyHourlyRate => $composableBuilder(
+  ColumnOrderings<int> get companyHourlyRate => $composableBuilder(
     column: $table.companyHourlyRate,
     builder: (column) => ColumnOrderings(column),
   );
@@ -9612,7 +9605,7 @@ class $$SettingsTableAnnotationComposer
   GeneratedColumn<String> get vendors =>
       $composableBuilder(column: $table.vendors, builder: (column) => column);
 
-  GeneratedColumn<double> get companyHourlyRate => $composableBuilder(
+  GeneratedColumn<int> get companyHourlyRate => $composableBuilder(
     column: $table.companyHourlyRate,
     builder: (column) => column,
   );
@@ -9691,7 +9684,7 @@ class $$SettingsTableTableManager
                 Value<int?> nextEmployeeNumber = const Value.absent(),
                 Value<String?> vehicleDesignations = const Value.absent(),
                 Value<String?> vendors = const Value.absent(),
-                Value<double?> companyHourlyRate = const Value.absent(),
+                Value<int?> companyHourlyRate = const Value.absent(),
                 Value<double?> burdenRate = const Value.absent(),
                 Value<int?> timeRoundingInterval = const Value.absent(),
                 Value<int?> autoBackupReminderFrequency = const Value.absent(),
@@ -9723,7 +9716,7 @@ class $$SettingsTableTableManager
                 Value<int?> nextEmployeeNumber = const Value.absent(),
                 Value<String?> vehicleDesignations = const Value.absent(),
                 Value<String?> vendors = const Value.absent(),
-                Value<double?> companyHourlyRate = const Value.absent(),
+                Value<int?> companyHourlyRate = const Value.absent(),
                 Value<double?> burdenRate = const Value.absent(),
                 Value<int?> timeRoundingInterval = const Value.absent(),
                 Value<int?> autoBackupReminderFrequency = const Value.absent(),
@@ -10177,8 +10170,8 @@ typedef $$ProjectsTableCreateCompanionBuilder =
       Value<int> isCompleted,
       Value<String?> completionDate,
       Value<int> isInternal,
-      Value<double?> billedHourlyRate,
-      Value<double?> projectPrice,
+      Value<int?> billedHourlyRate,
+      Value<int?> projectPrice,
       Value<double> expenseMarkupPercentage,
       Value<double> taxRate,
       Value<int?> parentProjectId,
@@ -10196,8 +10189,8 @@ typedef $$ProjectsTableUpdateCompanionBuilder =
       Value<int> isCompleted,
       Value<String?> completionDate,
       Value<int> isInternal,
-      Value<double?> billedHourlyRate,
-      Value<double?> projectPrice,
+      Value<int?> billedHourlyRate,
+      Value<int?> projectPrice,
       Value<double> expenseMarkupPercentage,
       Value<double> taxRate,
       Value<int?> parentProjectId,
@@ -10357,12 +10350,12 @@ class $$ProjectsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get billedHourlyRate => $composableBuilder(
+  ColumnFilters<int> get billedHourlyRate => $composableBuilder(
     column: $table.billedHourlyRate,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get projectPrice => $composableBuilder(
+  ColumnFilters<int> get projectPrice => $composableBuilder(
     column: $table.projectPrice,
     builder: (column) => ColumnFilters(column),
   );
@@ -10558,12 +10551,12 @@ class $$ProjectsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get billedHourlyRate => $composableBuilder(
+  ColumnOrderings<int> get billedHourlyRate => $composableBuilder(
     column: $table.billedHourlyRate,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get projectPrice => $composableBuilder(
+  ColumnOrderings<int> get projectPrice => $composableBuilder(
     column: $table.projectPrice,
     builder: (column) => ColumnOrderings(column),
   );
@@ -10678,12 +10671,12 @@ class $$ProjectsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get billedHourlyRate => $composableBuilder(
+  GeneratedColumn<int> get billedHourlyRate => $composableBuilder(
     column: $table.billedHourlyRate,
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get projectPrice => $composableBuilder(
+  GeneratedColumn<int> get projectPrice => $composableBuilder(
     column: $table.projectPrice,
     builder: (column) => column,
   );
@@ -10863,8 +10856,8 @@ class $$ProjectsTableTableManager
                 Value<int> isCompleted = const Value.absent(),
                 Value<String?> completionDate = const Value.absent(),
                 Value<int> isInternal = const Value.absent(),
-                Value<double?> billedHourlyRate = const Value.absent(),
-                Value<double?> projectPrice = const Value.absent(),
+                Value<int?> billedHourlyRate = const Value.absent(),
+                Value<int?> projectPrice = const Value.absent(),
                 Value<double> expenseMarkupPercentage = const Value.absent(),
                 Value<double> taxRate = const Value.absent(),
                 Value<int?> parentProjectId = const Value.absent(),
@@ -10899,8 +10892,8 @@ class $$ProjectsTableTableManager
                 Value<int> isCompleted = const Value.absent(),
                 Value<String?> completionDate = const Value.absent(),
                 Value<int> isInternal = const Value.absent(),
-                Value<double?> billedHourlyRate = const Value.absent(),
-                Value<double?> projectPrice = const Value.absent(),
+                Value<int?> billedHourlyRate = const Value.absent(),
+                Value<int?> projectPrice = const Value.absent(),
                 Value<double> expenseMarkupPercentage = const Value.absent(),
                 Value<double> taxRate = const Value.absent(),
                 Value<int?> parentProjectId = const Value.absent(),
@@ -11087,13 +11080,13 @@ typedef $$RolesTableCreateCompanionBuilder =
     RolesCompanion Function({
       Value<int> id,
       required String name,
-      Value<double> standardRate,
+      Value<int> standardRate,
     });
 typedef $$RolesTableUpdateCompanionBuilder =
     RolesCompanion Function({
       Value<int> id,
       Value<String> name,
-      Value<double> standardRate,
+      Value<int> standardRate,
     });
 
 final class $$RolesTableReferences
@@ -11137,7 +11130,7 @@ class $$RolesTableFilterComposer extends Composer<_$AppDatabase, $RolesTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get standardRate => $composableBuilder(
+  ColumnFilters<int> get standardRate => $composableBuilder(
     column: $table.standardRate,
     builder: (column) => ColumnFilters(column),
   );
@@ -11187,7 +11180,7 @@ class $$RolesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get standardRate => $composableBuilder(
+  ColumnOrderings<int> get standardRate => $composableBuilder(
     column: $table.standardRate,
     builder: (column) => ColumnOrderings(column),
   );
@@ -11208,7 +11201,7 @@ class $$RolesTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<double> get standardRate => $composableBuilder(
+  GeneratedColumn<int> get standardRate => $composableBuilder(
     column: $table.standardRate,
     builder: (column) => column,
   );
@@ -11269,7 +11262,7 @@ class $$RolesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
-                Value<double> standardRate = const Value.absent(),
+                Value<int> standardRate = const Value.absent(),
               }) => RolesCompanion(
                 id: id,
                 name: name,
@@ -11279,7 +11272,7 @@ class $$RolesTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
-                Value<double> standardRate = const Value.absent(),
+                Value<int> standardRate = const Value.absent(),
               }) => RolesCompanion.insert(
                 id: id,
                 name: name,
@@ -11337,7 +11330,7 @@ typedef $$EmployeesTableCreateCompanionBuilder =
       Value<String?> employeeNumber,
       required String name,
       Value<int?> titleId,
-      Value<double?> hourlyRate,
+      Value<int?> hourlyRate,
       Value<int> isDeleted,
     });
 typedef $$EmployeesTableUpdateCompanionBuilder =
@@ -11346,7 +11339,7 @@ typedef $$EmployeesTableUpdateCompanionBuilder =
       Value<String?> employeeNumber,
       Value<String> name,
       Value<int?> titleId,
-      Value<double?> hourlyRate,
+      Value<int?> hourlyRate,
       Value<int> isDeleted,
     });
 
@@ -11436,7 +11429,7 @@ class $$EmployeesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get hourlyRate => $composableBuilder(
+  ColumnFilters<int> get hourlyRate => $composableBuilder(
     column: $table.hourlyRate,
     builder: (column) => ColumnFilters(column),
   );
@@ -11544,7 +11537,7 @@ class $$EmployeesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get hourlyRate => $composableBuilder(
+  ColumnOrderings<int> get hourlyRate => $composableBuilder(
     column: $table.hourlyRate,
     builder: (column) => ColumnOrderings(column),
   );
@@ -11598,7 +11591,7 @@ class $$EmployeesTableAnnotationComposer
   GeneratedColumn<String> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<double> get hourlyRate => $composableBuilder(
+  GeneratedColumn<int> get hourlyRate => $composableBuilder(
     column: $table.hourlyRate,
     builder: (column) => column,
   );
@@ -11716,7 +11709,7 @@ class $$EmployeesTableTableManager
                 Value<String?> employeeNumber = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<int?> titleId = const Value.absent(),
-                Value<double?> hourlyRate = const Value.absent(),
+                Value<int?> hourlyRate = const Value.absent(),
                 Value<int> isDeleted = const Value.absent(),
               }) => EmployeesCompanion(
                 id: id,
@@ -11732,7 +11725,7 @@ class $$EmployeesTableTableManager
                 Value<String?> employeeNumber = const Value.absent(),
                 required String name,
                 Value<int?> titleId = const Value.absent(),
-                Value<double?> hourlyRate = const Value.absent(),
+                Value<int?> hourlyRate = const Value.absent(),
                 Value<int> isDeleted = const Value.absent(),
               }) => EmployeesCompanion.insert(
                 id: id,
@@ -12362,28 +12355,28 @@ typedef $$InvoicesTableCreateCompanionBuilder =
       required int clientId,
       required int projectId,
       Value<String?> projectAddress,
-      Value<double> labourSubtotal,
-      Value<double> materialsSubtotal,
-      Value<double> materialsPickupCost,
-      Value<double> otherCosts,
+      Value<int> labourSubtotal,
+      Value<int> materialsSubtotal,
+      Value<int> materialsPickupCost,
+      Value<int> otherCosts,
       Value<String?> otherCostsDescription,
-      Value<double> discountAmount,
+      Value<int> discountAmount,
       Value<String?> discountDescription,
       Value<double> discountPercent,
       Value<String?> tax1Name,
       Value<double?> tax1Rate,
-      Value<double> tax1Amount,
+      Value<int> tax1Amount,
       Value<String?> tax1RegistrationNumber,
       Value<String?> tax2Name,
       Value<double?> tax2Rate,
-      Value<double> tax2Amount,
+      Value<int> tax2Amount,
       Value<String?> tax2RegistrationNumber,
-      Value<double> subtotal,
-      Value<double> totalAmount,
+      Value<int> subtotal,
+      Value<int> totalAmount,
       Value<String> terms,
       Value<String?> poNumber,
       Value<int> isPaid,
-      Value<double?> amountPaid,
+      Value<int?> amountPaid,
       Value<String?> paymentDate,
       Value<String?> paymentMethod,
       Value<String?> paymentReference,
@@ -12407,28 +12400,28 @@ typedef $$InvoicesTableUpdateCompanionBuilder =
       Value<int> clientId,
       Value<int> projectId,
       Value<String?> projectAddress,
-      Value<double> labourSubtotal,
-      Value<double> materialsSubtotal,
-      Value<double> materialsPickupCost,
-      Value<double> otherCosts,
+      Value<int> labourSubtotal,
+      Value<int> materialsSubtotal,
+      Value<int> materialsPickupCost,
+      Value<int> otherCosts,
       Value<String?> otherCostsDescription,
-      Value<double> discountAmount,
+      Value<int> discountAmount,
       Value<String?> discountDescription,
       Value<double> discountPercent,
       Value<String?> tax1Name,
       Value<double?> tax1Rate,
-      Value<double> tax1Amount,
+      Value<int> tax1Amount,
       Value<String?> tax1RegistrationNumber,
       Value<String?> tax2Name,
       Value<double?> tax2Rate,
-      Value<double> tax2Amount,
+      Value<int> tax2Amount,
       Value<String?> tax2RegistrationNumber,
-      Value<double> subtotal,
-      Value<double> totalAmount,
+      Value<int> subtotal,
+      Value<int> totalAmount,
       Value<String> terms,
       Value<String?> poNumber,
       Value<int> isPaid,
-      Value<double?> amountPaid,
+      Value<int?> amountPaid,
       Value<String?> paymentDate,
       Value<String?> paymentMethod,
       Value<String?> paymentReference,
@@ -12570,22 +12563,22 @@ class $$InvoicesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get labourSubtotal => $composableBuilder(
+  ColumnFilters<int> get labourSubtotal => $composableBuilder(
     column: $table.labourSubtotal,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get materialsSubtotal => $composableBuilder(
+  ColumnFilters<int> get materialsSubtotal => $composableBuilder(
     column: $table.materialsSubtotal,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get materialsPickupCost => $composableBuilder(
+  ColumnFilters<int> get materialsPickupCost => $composableBuilder(
     column: $table.materialsPickupCost,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get otherCosts => $composableBuilder(
+  ColumnFilters<int> get otherCosts => $composableBuilder(
     column: $table.otherCosts,
     builder: (column) => ColumnFilters(column),
   );
@@ -12595,7 +12588,7 @@ class $$InvoicesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get discountAmount => $composableBuilder(
+  ColumnFilters<int> get discountAmount => $composableBuilder(
     column: $table.discountAmount,
     builder: (column) => ColumnFilters(column),
   );
@@ -12620,7 +12613,7 @@ class $$InvoicesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get tax1Amount => $composableBuilder(
+  ColumnFilters<int> get tax1Amount => $composableBuilder(
     column: $table.tax1Amount,
     builder: (column) => ColumnFilters(column),
   );
@@ -12640,7 +12633,7 @@ class $$InvoicesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get tax2Amount => $composableBuilder(
+  ColumnFilters<int> get tax2Amount => $composableBuilder(
     column: $table.tax2Amount,
     builder: (column) => ColumnFilters(column),
   );
@@ -12650,12 +12643,12 @@ class $$InvoicesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get subtotal => $composableBuilder(
+  ColumnFilters<int> get subtotal => $composableBuilder(
     column: $table.subtotal,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get totalAmount => $composableBuilder(
+  ColumnFilters<int> get totalAmount => $composableBuilder(
     column: $table.totalAmount,
     builder: (column) => ColumnFilters(column),
   );
@@ -12675,7 +12668,7 @@ class $$InvoicesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get amountPaid => $composableBuilder(
+  ColumnFilters<int> get amountPaid => $composableBuilder(
     column: $table.amountPaid,
     builder: (column) => ColumnFilters(column),
   );
@@ -12894,22 +12887,22 @@ class $$InvoicesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get labourSubtotal => $composableBuilder(
+  ColumnOrderings<int> get labourSubtotal => $composableBuilder(
     column: $table.labourSubtotal,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get materialsSubtotal => $composableBuilder(
+  ColumnOrderings<int> get materialsSubtotal => $composableBuilder(
     column: $table.materialsSubtotal,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get materialsPickupCost => $composableBuilder(
+  ColumnOrderings<int> get materialsPickupCost => $composableBuilder(
     column: $table.materialsPickupCost,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get otherCosts => $composableBuilder(
+  ColumnOrderings<int> get otherCosts => $composableBuilder(
     column: $table.otherCosts,
     builder: (column) => ColumnOrderings(column),
   );
@@ -12919,7 +12912,7 @@ class $$InvoicesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get discountAmount => $composableBuilder(
+  ColumnOrderings<int> get discountAmount => $composableBuilder(
     column: $table.discountAmount,
     builder: (column) => ColumnOrderings(column),
   );
@@ -12944,7 +12937,7 @@ class $$InvoicesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get tax1Amount => $composableBuilder(
+  ColumnOrderings<int> get tax1Amount => $composableBuilder(
     column: $table.tax1Amount,
     builder: (column) => ColumnOrderings(column),
   );
@@ -12964,7 +12957,7 @@ class $$InvoicesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get tax2Amount => $composableBuilder(
+  ColumnOrderings<int> get tax2Amount => $composableBuilder(
     column: $table.tax2Amount,
     builder: (column) => ColumnOrderings(column),
   );
@@ -12974,12 +12967,12 @@ class $$InvoicesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get subtotal => $composableBuilder(
+  ColumnOrderings<int> get subtotal => $composableBuilder(
     column: $table.subtotal,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get totalAmount => $composableBuilder(
+  ColumnOrderings<int> get totalAmount => $composableBuilder(
     column: $table.totalAmount,
     builder: (column) => ColumnOrderings(column),
   );
@@ -12999,7 +12992,7 @@ class $$InvoicesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get amountPaid => $composableBuilder(
+  ColumnOrderings<int> get amountPaid => $composableBuilder(
     column: $table.amountPaid,
     builder: (column) => ColumnOrderings(column),
   );
@@ -13166,22 +13159,22 @@ class $$InvoicesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get labourSubtotal => $composableBuilder(
+  GeneratedColumn<int> get labourSubtotal => $composableBuilder(
     column: $table.labourSubtotal,
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get materialsSubtotal => $composableBuilder(
+  GeneratedColumn<int> get materialsSubtotal => $composableBuilder(
     column: $table.materialsSubtotal,
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get materialsPickupCost => $composableBuilder(
+  GeneratedColumn<int> get materialsPickupCost => $composableBuilder(
     column: $table.materialsPickupCost,
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get otherCosts => $composableBuilder(
+  GeneratedColumn<int> get otherCosts => $composableBuilder(
     column: $table.otherCosts,
     builder: (column) => column,
   );
@@ -13191,7 +13184,7 @@ class $$InvoicesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get discountAmount => $composableBuilder(
+  GeneratedColumn<int> get discountAmount => $composableBuilder(
     column: $table.discountAmount,
     builder: (column) => column,
   );
@@ -13212,7 +13205,7 @@ class $$InvoicesTableAnnotationComposer
   GeneratedColumn<double> get tax1Rate =>
       $composableBuilder(column: $table.tax1Rate, builder: (column) => column);
 
-  GeneratedColumn<double> get tax1Amount => $composableBuilder(
+  GeneratedColumn<int> get tax1Amount => $composableBuilder(
     column: $table.tax1Amount,
     builder: (column) => column,
   );
@@ -13228,7 +13221,7 @@ class $$InvoicesTableAnnotationComposer
   GeneratedColumn<double> get tax2Rate =>
       $composableBuilder(column: $table.tax2Rate, builder: (column) => column);
 
-  GeneratedColumn<double> get tax2Amount => $composableBuilder(
+  GeneratedColumn<int> get tax2Amount => $composableBuilder(
     column: $table.tax2Amount,
     builder: (column) => column,
   );
@@ -13238,10 +13231,10 @@ class $$InvoicesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get subtotal =>
+  GeneratedColumn<int> get subtotal =>
       $composableBuilder(column: $table.subtotal, builder: (column) => column);
 
-  GeneratedColumn<double> get totalAmount => $composableBuilder(
+  GeneratedColumn<int> get totalAmount => $composableBuilder(
     column: $table.totalAmount,
     builder: (column) => column,
   );
@@ -13255,7 +13248,7 @@ class $$InvoicesTableAnnotationComposer
   GeneratedColumn<int> get isPaid =>
       $composableBuilder(column: $table.isPaid, builder: (column) => column);
 
-  GeneratedColumn<double> get amountPaid => $composableBuilder(
+  GeneratedColumn<int> get amountPaid => $composableBuilder(
     column: $table.amountPaid,
     builder: (column) => column,
   );
@@ -13479,28 +13472,28 @@ class $$InvoicesTableTableManager
                 Value<int> clientId = const Value.absent(),
                 Value<int> projectId = const Value.absent(),
                 Value<String?> projectAddress = const Value.absent(),
-                Value<double> labourSubtotal = const Value.absent(),
-                Value<double> materialsSubtotal = const Value.absent(),
-                Value<double> materialsPickupCost = const Value.absent(),
-                Value<double> otherCosts = const Value.absent(),
+                Value<int> labourSubtotal = const Value.absent(),
+                Value<int> materialsSubtotal = const Value.absent(),
+                Value<int> materialsPickupCost = const Value.absent(),
+                Value<int> otherCosts = const Value.absent(),
                 Value<String?> otherCostsDescription = const Value.absent(),
-                Value<double> discountAmount = const Value.absent(),
+                Value<int> discountAmount = const Value.absent(),
                 Value<String?> discountDescription = const Value.absent(),
                 Value<double> discountPercent = const Value.absent(),
                 Value<String?> tax1Name = const Value.absent(),
                 Value<double?> tax1Rate = const Value.absent(),
-                Value<double> tax1Amount = const Value.absent(),
+                Value<int> tax1Amount = const Value.absent(),
                 Value<String?> tax1RegistrationNumber = const Value.absent(),
                 Value<String?> tax2Name = const Value.absent(),
                 Value<double?> tax2Rate = const Value.absent(),
-                Value<double> tax2Amount = const Value.absent(),
+                Value<int> tax2Amount = const Value.absent(),
                 Value<String?> tax2RegistrationNumber = const Value.absent(),
-                Value<double> subtotal = const Value.absent(),
-                Value<double> totalAmount = const Value.absent(),
+                Value<int> subtotal = const Value.absent(),
+                Value<int> totalAmount = const Value.absent(),
                 Value<String> terms = const Value.absent(),
                 Value<String?> poNumber = const Value.absent(),
                 Value<int> isPaid = const Value.absent(),
-                Value<double?> amountPaid = const Value.absent(),
+                Value<int?> amountPaid = const Value.absent(),
                 Value<String?> paymentDate = const Value.absent(),
                 Value<String?> paymentMethod = const Value.absent(),
                 Value<String?> paymentReference = const Value.absent(),
@@ -13567,28 +13560,28 @@ class $$InvoicesTableTableManager
                 required int clientId,
                 required int projectId,
                 Value<String?> projectAddress = const Value.absent(),
-                Value<double> labourSubtotal = const Value.absent(),
-                Value<double> materialsSubtotal = const Value.absent(),
-                Value<double> materialsPickupCost = const Value.absent(),
-                Value<double> otherCosts = const Value.absent(),
+                Value<int> labourSubtotal = const Value.absent(),
+                Value<int> materialsSubtotal = const Value.absent(),
+                Value<int> materialsPickupCost = const Value.absent(),
+                Value<int> otherCosts = const Value.absent(),
                 Value<String?> otherCostsDescription = const Value.absent(),
-                Value<double> discountAmount = const Value.absent(),
+                Value<int> discountAmount = const Value.absent(),
                 Value<String?> discountDescription = const Value.absent(),
                 Value<double> discountPercent = const Value.absent(),
                 Value<String?> tax1Name = const Value.absent(),
                 Value<double?> tax1Rate = const Value.absent(),
-                Value<double> tax1Amount = const Value.absent(),
+                Value<int> tax1Amount = const Value.absent(),
                 Value<String?> tax1RegistrationNumber = const Value.absent(),
                 Value<String?> tax2Name = const Value.absent(),
                 Value<double?> tax2Rate = const Value.absent(),
-                Value<double> tax2Amount = const Value.absent(),
+                Value<int> tax2Amount = const Value.absent(),
                 Value<String?> tax2RegistrationNumber = const Value.absent(),
-                Value<double> subtotal = const Value.absent(),
-                Value<double> totalAmount = const Value.absent(),
+                Value<int> subtotal = const Value.absent(),
+                Value<int> totalAmount = const Value.absent(),
                 Value<String> terms = const Value.absent(),
                 Value<String?> poNumber = const Value.absent(),
                 Value<int> isPaid = const Value.absent(),
-                Value<double?> amountPaid = const Value.absent(),
+                Value<int?> amountPaid = const Value.absent(),
                 Value<String?> paymentDate = const Value.absent(),
                 Value<String?> paymentMethod = const Value.absent(),
                 Value<String?> paymentReference = const Value.absent(),
@@ -13808,7 +13801,7 @@ typedef $$TimeEntriesTableCreateCompanionBuilder =
       Value<String?> endTime,
       Value<double> pausedDuration,
       Value<double?> finalBilledDurationSeconds,
-      Value<double?> hourlyRate,
+      Value<int?> hourlyRate,
       Value<int> isPaused,
       Value<String?> pauseStartTime,
       Value<int> isDeleted,
@@ -13826,7 +13819,7 @@ typedef $$TimeEntriesTableUpdateCompanionBuilder =
       Value<String?> endTime,
       Value<double> pausedDuration,
       Value<double?> finalBilledDurationSeconds,
-      Value<double?> hourlyRate,
+      Value<int?> hourlyRate,
       Value<int> isPaused,
       Value<String?> pauseStartTime,
       Value<int> isDeleted,
@@ -13951,7 +13944,7 @@ class $$TimeEntriesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get hourlyRate => $composableBuilder(
+  ColumnFilters<int> get hourlyRate => $composableBuilder(
     column: $table.hourlyRate,
     builder: (column) => ColumnFilters(column),
   );
@@ -14108,7 +14101,7 @@ class $$TimeEntriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get hourlyRate => $composableBuilder(
+  ColumnOrderings<int> get hourlyRate => $composableBuilder(
     column: $table.hourlyRate,
     builder: (column) => ColumnOrderings(column),
   );
@@ -14259,7 +14252,7 @@ class $$TimeEntriesTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get hourlyRate => $composableBuilder(
+  GeneratedColumn<int> get hourlyRate => $composableBuilder(
     column: $table.hourlyRate,
     builder: (column) => column,
   );
@@ -14417,7 +14410,7 @@ class $$TimeEntriesTableTableManager
                 Value<double> pausedDuration = const Value.absent(),
                 Value<double?> finalBilledDurationSeconds =
                     const Value.absent(),
-                Value<double?> hourlyRate = const Value.absent(),
+                Value<int?> hourlyRate = const Value.absent(),
                 Value<int> isPaused = const Value.absent(),
                 Value<String?> pauseStartTime = const Value.absent(),
                 Value<int> isDeleted = const Value.absent(),
@@ -14452,7 +14445,7 @@ class $$TimeEntriesTableTableManager
                 Value<double> pausedDuration = const Value.absent(),
                 Value<double?> finalBilledDurationSeconds =
                     const Value.absent(),
-                Value<double?> hourlyRate = const Value.absent(),
+                Value<int?> hourlyRate = const Value.absent(),
                 Value<int> isPaused = const Value.absent(),
                 Value<String?> pauseStartTime = const Value.absent(),
                 Value<int> isDeleted = const Value.absent(),
@@ -14607,7 +14600,7 @@ typedef $$MaterialsTableCreateCompanionBuilder =
       Value<int> id,
       required int projectId,
       required String itemName,
-      required double cost,
+      required int cost,
       Value<String?> purchaseDate,
       Value<String?> description,
       Value<int> isDeleted,
@@ -14628,7 +14621,7 @@ typedef $$MaterialsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<int> projectId,
       Value<String> itemName,
-      Value<double> cost,
+      Value<int> cost,
       Value<String?> purchaseDate,
       Value<String?> description,
       Value<int> isDeleted,
@@ -14726,7 +14719,7 @@ class $$MaterialsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get cost => $composableBuilder(
+  ColumnFilters<int> get cost => $composableBuilder(
     column: $table.cost,
     builder: (column) => ColumnFilters(column),
   );
@@ -14880,7 +14873,7 @@ class $$MaterialsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get cost => $composableBuilder(
+  ColumnOrderings<int> get cost => $composableBuilder(
     column: $table.cost,
     builder: (column) => ColumnOrderings(column),
   );
@@ -15030,7 +15023,7 @@ class $$MaterialsTableAnnotationComposer
   GeneratedColumn<String> get itemName =>
       $composableBuilder(column: $table.itemName, builder: (column) => column);
 
-  GeneratedColumn<double> get cost =>
+  GeneratedColumn<int> get cost =>
       $composableBuilder(column: $table.cost, builder: (column) => column);
 
   GeneratedColumn<String> get purchaseDate => $composableBuilder(
@@ -15190,7 +15183,7 @@ class $$MaterialsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> projectId = const Value.absent(),
                 Value<String> itemName = const Value.absent(),
-                Value<double> cost = const Value.absent(),
+                Value<int> cost = const Value.absent(),
                 Value<String?> purchaseDate = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<int> isDeleted = const Value.absent(),
@@ -15230,7 +15223,7 @@ class $$MaterialsTableTableManager
                 Value<int> id = const Value.absent(),
                 required int projectId,
                 required String itemName,
-                required double cost,
+                required int cost,
                 Value<String?> purchaseDate = const Value.absent(),
                 Value<String?> description = const Value.absent(),
                 Value<int> isDeleted = const Value.absent(),
@@ -15943,7 +15936,7 @@ typedef $$WorkerPaymentsTableCreateCompanionBuilder =
       Value<int> id,
       required int employeeId,
       required String paymentDate,
-      required double amount,
+      required int amount,
       Value<String?> note,
       required String createdAt,
     });
@@ -15952,7 +15945,7 @@ typedef $$WorkerPaymentsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<int> employeeId,
       Value<String> paymentDate,
-      Value<double> amount,
+      Value<int> amount,
       Value<String?> note,
       Value<String> createdAt,
     });
@@ -16005,7 +15998,7 @@ class $$WorkerPaymentsTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<double> get amount => $composableBuilder(
+  ColumnFilters<int> get amount => $composableBuilder(
     column: $table.amount,
     builder: (column) => ColumnFilters(column),
   );
@@ -16063,7 +16056,7 @@ class $$WorkerPaymentsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get amount => $composableBuilder(
+  ColumnOrderings<int> get amount => $composableBuilder(
     column: $table.amount,
     builder: (column) => ColumnOrderings(column),
   );
@@ -16119,7 +16112,7 @@ class $$WorkerPaymentsTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<double> get amount =>
+  GeneratedColumn<int> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
 
   GeneratedColumn<String> get note =>
@@ -16185,7 +16178,7 @@ class $$WorkerPaymentsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<int> employeeId = const Value.absent(),
                 Value<String> paymentDate = const Value.absent(),
-                Value<double> amount = const Value.absent(),
+                Value<int> amount = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
               }) => WorkerPaymentsCompanion(
@@ -16201,7 +16194,7 @@ class $$WorkerPaymentsTableTableManager
                 Value<int> id = const Value.absent(),
                 required int employeeId,
                 required String paymentDate,
-                required double amount,
+                required int amount,
                 Value<String?> note = const Value.absent(),
                 required String createdAt,
               }) => WorkerPaymentsCompanion.insert(

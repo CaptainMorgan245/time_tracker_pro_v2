@@ -45,7 +45,7 @@ class _BurdenRateTabState extends ConsumerState<BurdenRateTab> {
   Future<void> _load() async {
     final s = await _db.settingsDao.getSettings();
     if (s?.companyHourlyRate != null) {
-      _rateController.text = s!.companyHourlyRate!.toStringAsFixed(2);
+      _rateController.text = (s!.companyHourlyRate! / 100).toStringAsFixed(2);
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -53,7 +53,7 @@ class _BurdenRateTabState extends ConsumerState<BurdenRateTab> {
   Future<void> _saveRate(double rate) async {
     await _db.settingsDao.saveSettings(
       SettingsCompanion(
-        companyHourlyRate: Value(rate),
+        companyHourlyRate: Value((rate * 100).round()),
         burdenRate: Value(rate),
       ),
     );

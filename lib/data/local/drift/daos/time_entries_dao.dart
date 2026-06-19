@@ -43,4 +43,13 @@ class TimeEntriesDao extends DatabaseAccessor<AppDatabase>
   Future<int> softDeleteById(int id) =>
       (update(timeEntries)..where((t) => t.id.equals(id)))
           .write(const TimeEntriesCompanion(isDeleted: Value(1)));
+
+  /// Releases all entries billed to [invoiceId] back to unbilled (used when an
+  /// extras invoice is voided).
+  Future<int> clearInvoiceLink(int invoiceId) =>
+      (update(timeEntries)..where((t) => t.invoiceId.equals(invoiceId)))
+          .write(const TimeEntriesCompanion(
+        isBilled: Value(0),
+        invoiceId: Value(null),
+      ));
 }

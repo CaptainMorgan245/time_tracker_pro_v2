@@ -97,7 +97,7 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
     setState(() {
       _editingId = e.id;
       _itemNameController.text = e.itemName;
-      _costController.text = e.cost.abs().toStringAsFixed(2);
+      _costController.text = (e.cost.abs() / 100).toStringAsFixed(2);
       _quantityController.text = e.quantity?.toStringAsFixed(2) ?? '';
       _odometerController.text = e.odometerReading?.toStringAsFixed(0) ?? '';
       _purchaseDate = e.purchaseDate != null
@@ -168,7 +168,8 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
       _snack('Enter a valid cost.');
       return;
     }
-    final signed = _isReturn ? -raw.abs() : raw.abs();
+    final signedDollars = _isReturn ? -raw.abs() : raw.abs();
+    final signed = (signedDollars * 100).round();
     final itemName = _itemNameController.text.trim().isEmpty
         ? 'General Expense'
         : _itemNameController.text.trim();

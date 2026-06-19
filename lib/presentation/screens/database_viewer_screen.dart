@@ -83,7 +83,7 @@ class _DatabaseViewerScreenState extends ConsumerState<DatabaseViewerScreen> {
         isTime: false,
         date: DateTime.parse(d['purchase_date'] as String),
         description: d['item_name'] as String? ?? 'Unnamed Item',
-        value: (d['cost'] as num? ?? 0.0).toDouble(),
+        value: (d['cost'] as num? ?? 0).toDouble() / 100,
         categoryOrProject: d['expense_category'] as String? ??
             d['project_name'] as String? ??
             'Uncategorized',

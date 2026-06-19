@@ -120,7 +120,7 @@ class AppDatabase extends _$AppDatabase {
       SettingsCompanion.insert(
         id: const Value(1),
         nextEmployeeNumber: const Value(1),
-        companyHourlyRate: const Value(0.0),
+        companyHourlyRate: const Value(0),
         burdenRate: const Value(0.0),
         timeRoundingInterval: const Value(15),
         autoBackupReminderFrequency: const Value(10),

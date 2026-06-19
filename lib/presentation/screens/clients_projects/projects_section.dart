@@ -33,9 +33,9 @@ class ProjectsSection extends StatelessWidget {
   Widget _tile(BuildContext context, DbProject project) {
     final String priceOrRate;
     if (project.pricingModel == 'hourly') {
-      priceOrRate = '\$${project.billedHourlyRate?.toStringAsFixed(2) ?? '0.00'}/hr';
+      priceOrRate = '\$${((project.billedHourlyRate ?? 0) / 100).toStringAsFixed(2)}/hr';
     } else {
-      priceOrRate = '\$${project.projectPrice?.toStringAsFixed(2) ?? '0.00'} Fixed';
+      priceOrRate = '\$${((project.projectPrice ?? 0) / 100).toStringAsFixed(2)} Fixed';
     }
 
     final isCompleted = project.isCompleted != 0;

@@ -9,7 +9,7 @@ class WorkerPayments extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get employeeId => integer().references(Employees, #id)();
   TextColumn get paymentDate => text()();
-  RealColumn get amount => real()();
+  IntColumn get amount => integer()();
   TextColumn get note => text().nullable()();
   TextColumn get createdAt => text()();
 }

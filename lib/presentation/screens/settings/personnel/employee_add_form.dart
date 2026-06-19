@@ -54,8 +54,9 @@ class _AddEmployeeFormState extends ConsumerState<AddEmployeeForm> {
       return;
     }
     final role = widget.roles.firstWhere((r) => r.id == roleId);
+    final rateDollars = double.tryParse(_hourlyRateController.text);
     final rate =
-        double.tryParse(_hourlyRateController.text) ?? role.standardRate;
+        rateDollars != null ? (rateDollars * 100).round() : role.standardRate;
 
     setState(() => _isSubmitting = true);
     try {
@@ -119,7 +120,7 @@ class _AddEmployeeFormState extends ConsumerState<AddEmployeeForm> {
                       setState(() {
                         _selectedRoleId = id;
                         _hourlyRateController.text =
-                            role.standardRate.toString();
+                            (role.standardRate / 100).toStringAsFixed(2);
                       });
                     },
                   ),

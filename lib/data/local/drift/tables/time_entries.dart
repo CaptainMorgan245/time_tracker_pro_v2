@@ -17,7 +17,7 @@ class TimeEntries extends Table {
   TextColumn get endTime => text().nullable()();
   RealColumn get pausedDuration => real().withDefault(const Constant(0.0))();
   RealColumn get finalBilledDurationSeconds => real().nullable()();
-  RealColumn get hourlyRate => real().nullable()();
+  IntColumn get hourlyRate => integer().nullable()();
   IntColumn get isPaused => integer().withDefault(const Constant(0))();
   TextColumn get pauseStartTime => text().nullable()();
   IntColumn get isDeleted => integer().withDefault(const Constant(0))();

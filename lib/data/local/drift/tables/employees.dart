@@ -9,6 +9,6 @@ class Employees extends Table {
   TextColumn get employeeNumber => text().unique().nullable()();
   TextColumn get name => text()();
   IntColumn get titleId => integer().nullable().references(Roles, #id)();
-  RealColumn get hourlyRate => real().nullable()();
+  IntColumn get hourlyRate => integer().nullable()();
   IntColumn get isDeleted => integer().withDefault(const Constant(0))();
 }

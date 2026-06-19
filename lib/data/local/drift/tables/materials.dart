@@ -11,7 +11,7 @@ class Materials extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get projectId => integer().references(Projects, #id)();
   TextColumn get itemName => text()();
-  RealColumn get cost => real()();
+  IntColumn get cost => integer()();
   TextColumn get purchaseDate => text().nullable()();
   TextColumn get description => text().nullable()();
   IntColumn get isDeleted => integer().withDefault(const Constant(0))();

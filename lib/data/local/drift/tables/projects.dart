@@ -18,8 +18,8 @@ class Projects extends Table {
   IntColumn get isCompleted => integer().withDefault(const Constant(0))();
   TextColumn get completionDate => text().nullable()();
   IntColumn get isInternal => integer().withDefault(const Constant(0))();
-  RealColumn get billedHourlyRate => real().nullable()();
-  RealColumn get projectPrice => real().nullable()();
+  IntColumn get billedHourlyRate => integer().nullable()();
+  IntColumn get projectPrice => integer().nullable()();
   RealColumn get expenseMarkupPercentage =>
       real().withDefault(const Constant(15.0))();
   RealColumn get taxRate => real().withDefault(const Constant(5.0))();

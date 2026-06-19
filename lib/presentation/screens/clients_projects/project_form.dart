@@ -32,9 +32,13 @@ class _ProjectFormState extends ConsumerState<ProjectForm> {
   late final _postalController =
       TextEditingController(text: widget.existing?.postalCode ?? '');
   late final _hourlyRateController = TextEditingController(
-      text: widget.existing?.billedHourlyRate?.toString() ?? '');
+      text: widget.existing?.billedHourlyRate != null
+          ? (widget.existing!.billedHourlyRate! / 100).toStringAsFixed(2)
+          : '');
   late final _priceController = TextEditingController(
-      text: widget.existing?.projectPrice?.toString() ?? '');
+      text: widget.existing?.projectPrice != null
+          ? (widget.existing!.projectPrice! / 100).toStringAsFixed(2)
+          : '');
   late final _markupController = TextEditingController(
       text: (widget.existing?.expenseMarkupPercentage ?? 15.0).toString());
   late final _taxController = TextEditingController(
@@ -75,8 +79,11 @@ class _ProjectFormState extends ConsumerState<ProjectForm> {
     }
     final markup = double.tryParse(_markupController.text) ?? 15.0;
     final tax = double.tryParse(_taxController.text) ?? 5.0;
-    final hourlyRate = double.tryParse(_hourlyRateController.text);
-    final price = double.tryParse(_priceController.text);
+    final hourlyRateDollars = double.tryParse(_hourlyRateController.text);
+    final hourlyRate =
+        hourlyRateDollars == null ? null : (hourlyRateDollars * 100).round();
+    final priceDollars = double.tryParse(_priceController.text);
+    final price = priceDollars == null ? null : (priceDollars * 100).round();
 
     if (_isEditing) {
       final p = widget.existing!;

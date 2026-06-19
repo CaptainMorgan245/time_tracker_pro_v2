@@ -34,7 +34,10 @@ class _EmployeeListState extends ConsumerState<EmployeeList> {
   Future<void> _showEditDialog(DbEmployee employee, List<DbRole> roles) async {
     final nameController = TextEditingController(text: employee.name);
     final hourlyRateController =
-        TextEditingController(text: employee.hourlyRate?.toString() ?? '');
+        TextEditingController(
+            text: employee.hourlyRate != null
+                ? (employee.hourlyRate! / 100).toStringAsFixed(2)
+                : '');
     int? selectedRoleId = employee.titleId;
     final isDeleted = employee.isDeleted != 0;
 
@@ -110,7 +113,10 @@ class _EmployeeListState extends ConsumerState<EmployeeList> {
                 employeeNumber: Value(employee.employeeNumber),
                 name: Value(nameController.text.trim()),
                 titleId: Value(selectedRoleId),
-                hourlyRate: Value(double.tryParse(hourlyRateController.text)),
+                hourlyRate: Value(() {
+                  final d = double.tryParse(hourlyRateController.text);
+                  return d == null ? null : (d * 100).round();
+                }()),
                 isDeleted: Value(employee.isDeleted),
               ));
               Navigator.of(context).pop();

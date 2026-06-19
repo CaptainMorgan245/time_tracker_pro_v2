@@ -5,5 +5,5 @@ import 'package:drift/drift.dart';
 class Roles extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().unique()();
-  RealColumn get standardRate => real().withDefault(const Constant(0.0))();
+  IntColumn get standardRate => integer().withDefault(const Constant(0))();
 }

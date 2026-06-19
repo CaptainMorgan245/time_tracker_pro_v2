@@ -113,7 +113,7 @@ class _CostEntryScreenState extends ConsumerState<CostEntryScreen> {
       separatorBuilder: (_, __) => const SizedBox(height: 2),
       itemBuilder: (context, i) {
         final r = records[i];
-        final cost = NumberFormat.currency(symbol: '\$').format(r.cost);
+        final cost = NumberFormat.currency(symbol: '\$').format(r.cost / 100);
         final date = r.purchaseDate != null
             ? DateFormat('MM/dd').format(DateTime.parse(r.purchaseDate!))
             : '--';

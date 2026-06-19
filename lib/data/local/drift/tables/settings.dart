@@ -9,7 +9,7 @@ class Settings extends Table {
   IntColumn get nextEmployeeNumber => integer().nullable()();
   TextColumn get vehicleDesignations => text().nullable()();
   TextColumn get vendors => text().nullable()();
-  RealColumn get companyHourlyRate => real().nullable()();
+  IntColumn get companyHourlyRate => integer().nullable()();
   RealColumn get burdenRate => real().nullable()();
   IntColumn get timeRoundingInterval => integer().nullable()();
   IntColumn get autoBackupReminderFrequency => integer().nullable()();
