@@ -29,6 +29,19 @@ class TimeEntriesDao extends DatabaseAccessor<AppDatabase>
   Future<List<DbTimeEntry>> getByProject(int projectId) =>
       (select(timeEntries)..where((t) => t.projectId.equals(projectId))).get();
 
+  /// Unbilled, completed, non-deleted entries for [projectId] — the candidates
+  /// for a new invoice. Filters `isBilled = 0 AND isDeleted = 0 AND end_time IS
+  /// NOT NULL`, newest first.
+  Stream<List<DbTimeEntry>> watchUnbilledByProject(int projectId) =>
+      (select(timeEntries)
+            ..where((t) =>
+                t.projectId.equals(projectId) &
+                t.isBilled.equals(0) &
+                t.isDeleted.equals(0) &
+                t.endTime.isNotNull())
+            ..orderBy([(t) => OrderingTerm.desc(t.startTime)]))
+          .watch();
+
   Future<int> insertRow(TimeEntriesCompanion entry) =>
       into(timeEntries).insert(entry);
 
@@ -43,6 +56,19 @@ class TimeEntriesDao extends DatabaseAccessor<AppDatabase>
   Future<int> softDeleteById(int id) =>
       (update(timeEntries)..where((t) => t.id.equals(id)))
           .write(const TimeEntriesCompanion(isDeleted: Value(1)));
+
+  /// Marks the given [ids] as billed to [invoiceId] (the forward of
+  /// [clearInvoiceLink]; used when an invoice is created). No-op for an empty
+  /// list. Returns the number of rows updated.
+  Future<int> markBilled(List<int> ids, int invoiceId) async {
+    if (ids.isEmpty) return 0;
+    return (update(timeEntries)..where((t) => t.id.isIn(ids))).write(
+      TimeEntriesCompanion(
+        isBilled: const Value(1),
+        invoiceId: Value(invoiceId),
+      ),
+    );
+  }
 
   /// Releases all entries billed to [invoiceId] back to unbilled (used when an
   /// extras invoice is voided).

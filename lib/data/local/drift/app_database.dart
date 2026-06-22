@@ -6,6 +6,7 @@ import 'daos/company_settings_dao.dart';
 import 'daos/cost_codes_dao.dart';
 import 'daos/employees_dao.dart';
 import 'daos/expense_categories_dao.dart';
+import 'daos/invoice_payments_dao.dart';
 import 'daos/invoices_dao.dart';
 import 'daos/materials_dao.dart';
 import 'daos/projects_dao.dart';
@@ -18,6 +19,7 @@ import 'tables/company_settings.dart';
 import 'tables/cost_codes.dart';
 import 'tables/employees.dart';
 import 'tables/expense_categories.dart';
+import 'tables/invoice_payments.dart';
 import 'tables/invoices.dart';
 import 'tables/materials.dart';
 import 'tables/projects.dart';
@@ -47,6 +49,7 @@ part 'app_database.g.dart';
     CostCodes,
     ExpenseCategories,
     Invoices,
+    InvoicePayments,
     TimeEntries,
     Materials,
     CompanySettingsTable,
@@ -61,6 +64,7 @@ part 'app_database.g.dart';
     CostCodesDao,
     ExpenseCategoriesDao,
     InvoicesDao,
+    InvoicePaymentsDao,
     TimeEntriesDao,
     MaterialsDao,
     CompanySettingsDao,
@@ -75,7 +79,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -83,12 +87,17 @@ class AppDatabase extends _$AppDatabase {
           await m.createAll();
           await seedDefaults();
         },
-        // DEVELOPMENT-ONLY strategy: any schemaVersion bump wipes the database
-        // and rebuilds it from scratch, then re-seeds defaults. Real data is
-        // re-imported from a v23 backup afterwards, so incremental migrations
-        // aren't needed yet. Replace this with proper stepwise migrations
-        // before shipping a build that existing users will upgrade in place.
+        // v2 → v3 is a real, data-preserving migration (move inline invoice
+        // payment fields into the new `invoice_payments` table). Every *other*
+        // version transition still uses the DEVELOPMENT-ONLY destructive
+        // rebuild: wipe, recreate from scratch, re-seed defaults, and re-import
+        // real data from a v23 backup. Replace that fallback with proper
+        // stepwise migrations before shipping in-place upgrades to users.
         onUpgrade: (m, from, to) async {
+          if (from == 2 && to == 3) {
+            await _migrateV2ToV3(m);
+            return;
+          }
           await destroyEverything(m);
           await m.createAll();
           await seedDefaults();
@@ -108,6 +117,42 @@ class AppDatabase extends _$AppDatabase {
     for (final entity in allSchemaEntities.toList().reversed) {
       await m.drop(entity);
     }
+  }
+
+  /// Data-preserving migration from schema v2 to v3: invoice payment state moves
+  /// off the `invoices` row and into the new [InvoicePayments] table.
+  ///
+  /// Steps, in order (foreign keys are disabled during migrations):
+  ///   1. Create `invoice_payments` and its `invoice_id` index.
+  ///   2. One-time data pass — for every invoice that carried a payment
+  ///      (`amount_paid` not null and > 0), insert one non-void payment row from
+  ///      the existing inline fields. A missing `payment_date` falls back to the
+  ///      invoice date so the not-null payment/created date columns are honoured.
+  ///   3. Drop the now-redundant inline payment columns from `invoices`
+  ///      (`is_paid`, `amount_paid`, `payment_date`, `payment_method`,
+  ///      `payment_reference`, `payment_notes`) by recreating the table from its
+  ///      current Dart definition.
+  Future<void> _migrateV2ToV3(Migrator m) async {
+    await m.createTable(invoicePayments);
+    await customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_invoice_payments_invoice '
+      'ON invoice_payments (invoice_id)',
+    );
+
+    await customStatement('''
+      INSERT INTO invoice_payments
+        (invoice_id, amount, payment_date, payment_method,
+         payment_reference, payment_notes, is_void, created_at)
+      SELECT id, amount_paid, COALESCE(payment_date, invoice_date),
+             payment_method, payment_reference, payment_notes, 0,
+             COALESCE(payment_date, invoice_date)
+      FROM invoices
+      WHERE amount_paid IS NOT NULL AND amount_paid > 0
+    ''');
+
+    // Recreate `invoices` from its updated definition; columns no longer present
+    // in the Dart table (the inline payment fields) are dropped.
+    await m.alterTable(TableMigration(invoices));
   }
 
   /// Inserts the default singleton rows plus the internal "Company Expenses"

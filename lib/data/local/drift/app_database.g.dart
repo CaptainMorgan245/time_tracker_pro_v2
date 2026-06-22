@@ -3644,71 +3644,6 @@ class $InvoicesTable extends Invoices
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _isPaidMeta = const VerificationMeta('isPaid');
-  @override
-  late final GeneratedColumn<int> isPaid = GeneratedColumn<int>(
-    'is_paid',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultValue: const Constant(0),
-  );
-  static const VerificationMeta _amountPaidMeta = const VerificationMeta(
-    'amountPaid',
-  );
-  @override
-  late final GeneratedColumn<int> amountPaid = GeneratedColumn<int>(
-    'amount_paid',
-    aliasedName,
-    true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _paymentDateMeta = const VerificationMeta(
-    'paymentDate',
-  );
-  @override
-  late final GeneratedColumn<String> paymentDate = GeneratedColumn<String>(
-    'payment_date',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _paymentMethodMeta = const VerificationMeta(
-    'paymentMethod',
-  );
-  @override
-  late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
-    'payment_method',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _paymentReferenceMeta = const VerificationMeta(
-    'paymentReference',
-  );
-  @override
-  late final GeneratedColumn<String> paymentReference = GeneratedColumn<String>(
-    'payment_reference',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _paymentNotesMeta = const VerificationMeta(
-    'paymentNotes',
-  );
-  @override
-  late final GeneratedColumn<String> paymentNotes = GeneratedColumn<String>(
-    'payment_notes',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _isDeletedMeta = const VerificationMeta(
     'isDeleted',
   );
@@ -3849,12 +3784,6 @@ class $InvoicesTable extends Invoices
     totalAmount,
     terms,
     poNumber,
-    isPaid,
-    amountPaid,
-    paymentDate,
-    paymentMethod,
-    paymentReference,
-    paymentNotes,
     isDeleted,
     deletedReasonCode,
     deletedDate,
@@ -4078,54 +4007,6 @@ class $InvoicesTable extends Invoices
         poNumber.isAcceptableOrUnknown(data['po_number']!, _poNumberMeta),
       );
     }
-    if (data.containsKey('is_paid')) {
-      context.handle(
-        _isPaidMeta,
-        isPaid.isAcceptableOrUnknown(data['is_paid']!, _isPaidMeta),
-      );
-    }
-    if (data.containsKey('amount_paid')) {
-      context.handle(
-        _amountPaidMeta,
-        amountPaid.isAcceptableOrUnknown(data['amount_paid']!, _amountPaidMeta),
-      );
-    }
-    if (data.containsKey('payment_date')) {
-      context.handle(
-        _paymentDateMeta,
-        paymentDate.isAcceptableOrUnknown(
-          data['payment_date']!,
-          _paymentDateMeta,
-        ),
-      );
-    }
-    if (data.containsKey('payment_method')) {
-      context.handle(
-        _paymentMethodMeta,
-        paymentMethod.isAcceptableOrUnknown(
-          data['payment_method']!,
-          _paymentMethodMeta,
-        ),
-      );
-    }
-    if (data.containsKey('payment_reference')) {
-      context.handle(
-        _paymentReferenceMeta,
-        paymentReference.isAcceptableOrUnknown(
-          data['payment_reference']!,
-          _paymentReferenceMeta,
-        ),
-      );
-    }
-    if (data.containsKey('payment_notes')) {
-      context.handle(
-        _paymentNotesMeta,
-        paymentNotes.isAcceptableOrUnknown(
-          data['payment_notes']!,
-          _paymentNotesMeta,
-        ),
-      );
-    }
     if (data.containsKey('is_deleted')) {
       context.handle(
         _isDeletedMeta,
@@ -4320,30 +4201,6 @@ class $InvoicesTable extends Invoices
         DriftSqlType.string,
         data['${effectivePrefix}po_number'],
       ),
-      isPaid: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}is_paid'],
-      )!,
-      amountPaid: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}amount_paid'],
-      ),
-      paymentDate: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}payment_date'],
-      ),
-      paymentMethod: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}payment_method'],
-      ),
-      paymentReference: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}payment_reference'],
-      ),
-      paymentNotes: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}payment_notes'],
-      ),
       isDeleted: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}is_deleted'],
@@ -4420,12 +4277,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
   final int totalAmount;
   final String terms;
   final String? poNumber;
-  final int isPaid;
-  final int? amountPaid;
-  final String? paymentDate;
-  final String? paymentMethod;
-  final String? paymentReference;
-  final String? paymentNotes;
   final int isDeleted;
   final String? deletedReasonCode;
   final String? deletedDate;
@@ -4463,12 +4314,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
     required this.totalAmount,
     required this.terms,
     this.poNumber,
-    required this.isPaid,
-    this.amountPaid,
-    this.paymentDate,
-    this.paymentMethod,
-    this.paymentReference,
-    this.paymentNotes,
     required this.isDeleted,
     this.deletedReasonCode,
     this.deletedDate,
@@ -4532,22 +4377,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
     map['terms'] = Variable<String>(terms);
     if (!nullToAbsent || poNumber != null) {
       map['po_number'] = Variable<String>(poNumber);
-    }
-    map['is_paid'] = Variable<int>(isPaid);
-    if (!nullToAbsent || amountPaid != null) {
-      map['amount_paid'] = Variable<int>(amountPaid);
-    }
-    if (!nullToAbsent || paymentDate != null) {
-      map['payment_date'] = Variable<String>(paymentDate);
-    }
-    if (!nullToAbsent || paymentMethod != null) {
-      map['payment_method'] = Variable<String>(paymentMethod);
-    }
-    if (!nullToAbsent || paymentReference != null) {
-      map['payment_reference'] = Variable<String>(paymentReference);
-    }
-    if (!nullToAbsent || paymentNotes != null) {
-      map['payment_notes'] = Variable<String>(paymentNotes);
     }
     map['is_deleted'] = Variable<int>(isDeleted);
     if (!nullToAbsent || deletedReasonCode != null) {
@@ -4624,22 +4453,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
       poNumber: poNumber == null && nullToAbsent
           ? const Value.absent()
           : Value(poNumber),
-      isPaid: Value(isPaid),
-      amountPaid: amountPaid == null && nullToAbsent
-          ? const Value.absent()
-          : Value(amountPaid),
-      paymentDate: paymentDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(paymentDate),
-      paymentMethod: paymentMethod == null && nullToAbsent
-          ? const Value.absent()
-          : Value(paymentMethod),
-      paymentReference: paymentReference == null && nullToAbsent
-          ? const Value.absent()
-          : Value(paymentReference),
-      paymentNotes: paymentNotes == null && nullToAbsent
-          ? const Value.absent()
-          : Value(paymentNotes),
       isDeleted: Value(isDeleted),
       deletedReasonCode: deletedReasonCode == null && nullToAbsent
           ? const Value.absent()
@@ -4709,12 +4522,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
       totalAmount: serializer.fromJson<int>(json['totalAmount']),
       terms: serializer.fromJson<String>(json['terms']),
       poNumber: serializer.fromJson<String?>(json['poNumber']),
-      isPaid: serializer.fromJson<int>(json['isPaid']),
-      amountPaid: serializer.fromJson<int?>(json['amountPaid']),
-      paymentDate: serializer.fromJson<String?>(json['paymentDate']),
-      paymentMethod: serializer.fromJson<String?>(json['paymentMethod']),
-      paymentReference: serializer.fromJson<String?>(json['paymentReference']),
-      paymentNotes: serializer.fromJson<String?>(json['paymentNotes']),
       isDeleted: serializer.fromJson<int>(json['isDeleted']),
       deletedReasonCode: serializer.fromJson<String?>(
         json['deletedReasonCode'],
@@ -4767,12 +4574,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
       'totalAmount': serializer.toJson<int>(totalAmount),
       'terms': serializer.toJson<String>(terms),
       'poNumber': serializer.toJson<String?>(poNumber),
-      'isPaid': serializer.toJson<int>(isPaid),
-      'amountPaid': serializer.toJson<int?>(amountPaid),
-      'paymentDate': serializer.toJson<String?>(paymentDate),
-      'paymentMethod': serializer.toJson<String?>(paymentMethod),
-      'paymentReference': serializer.toJson<String?>(paymentReference),
-      'paymentNotes': serializer.toJson<String?>(paymentNotes),
       'isDeleted': serializer.toJson<int>(isDeleted),
       'deletedReasonCode': serializer.toJson<String?>(deletedReasonCode),
       'deletedDate': serializer.toJson<String?>(deletedDate),
@@ -4813,12 +4614,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
     int? totalAmount,
     String? terms,
     Value<String?> poNumber = const Value.absent(),
-    int? isPaid,
-    Value<int?> amountPaid = const Value.absent(),
-    Value<String?> paymentDate = const Value.absent(),
-    Value<String?> paymentMethod = const Value.absent(),
-    Value<String?> paymentReference = const Value.absent(),
-    Value<String?> paymentNotes = const Value.absent(),
     int? isDeleted,
     Value<String?> deletedReasonCode = const Value.absent(),
     Value<String?> deletedDate = const Value.absent(),
@@ -4866,16 +4661,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
     totalAmount: totalAmount ?? this.totalAmount,
     terms: terms ?? this.terms,
     poNumber: poNumber.present ? poNumber.value : this.poNumber,
-    isPaid: isPaid ?? this.isPaid,
-    amountPaid: amountPaid.present ? amountPaid.value : this.amountPaid,
-    paymentDate: paymentDate.present ? paymentDate.value : this.paymentDate,
-    paymentMethod: paymentMethod.present
-        ? paymentMethod.value
-        : this.paymentMethod,
-    paymentReference: paymentReference.present
-        ? paymentReference.value
-        : this.paymentReference,
-    paymentNotes: paymentNotes.present ? paymentNotes.value : this.paymentNotes,
     isDeleted: isDeleted ?? this.isDeleted,
     deletedReasonCode: deletedReasonCode.present
         ? deletedReasonCode.value
@@ -4955,22 +4740,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
           : this.totalAmount,
       terms: data.terms.present ? data.terms.value : this.terms,
       poNumber: data.poNumber.present ? data.poNumber.value : this.poNumber,
-      isPaid: data.isPaid.present ? data.isPaid.value : this.isPaid,
-      amountPaid: data.amountPaid.present
-          ? data.amountPaid.value
-          : this.amountPaid,
-      paymentDate: data.paymentDate.present
-          ? data.paymentDate.value
-          : this.paymentDate,
-      paymentMethod: data.paymentMethod.present
-          ? data.paymentMethod.value
-          : this.paymentMethod,
-      paymentReference: data.paymentReference.present
-          ? data.paymentReference.value
-          : this.paymentReference,
-      paymentNotes: data.paymentNotes.present
-          ? data.paymentNotes.value
-          : this.paymentNotes,
       isDeleted: data.isDeleted.present ? data.isDeleted.value : this.isDeleted,
       deletedReasonCode: data.deletedReasonCode.present
           ? data.deletedReasonCode.value
@@ -5027,12 +4796,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
           ..write('totalAmount: $totalAmount, ')
           ..write('terms: $terms, ')
           ..write('poNumber: $poNumber, ')
-          ..write('isPaid: $isPaid, ')
-          ..write('amountPaid: $amountPaid, ')
-          ..write('paymentDate: $paymentDate, ')
-          ..write('paymentMethod: $paymentMethod, ')
-          ..write('paymentReference: $paymentReference, ')
-          ..write('paymentNotes: $paymentNotes, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('deletedReasonCode: $deletedReasonCode, ')
           ..write('deletedDate: $deletedDate, ')
@@ -5075,12 +4838,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
     totalAmount,
     terms,
     poNumber,
-    isPaid,
-    amountPaid,
-    paymentDate,
-    paymentMethod,
-    paymentReference,
-    paymentNotes,
     isDeleted,
     deletedReasonCode,
     deletedDate,
@@ -5122,12 +4879,6 @@ class DbInvoice extends DataClass implements Insertable<DbInvoice> {
           other.totalAmount == this.totalAmount &&
           other.terms == this.terms &&
           other.poNumber == this.poNumber &&
-          other.isPaid == this.isPaid &&
-          other.amountPaid == this.amountPaid &&
-          other.paymentDate == this.paymentDate &&
-          other.paymentMethod == this.paymentMethod &&
-          other.paymentReference == this.paymentReference &&
-          other.paymentNotes == this.paymentNotes &&
           other.isDeleted == this.isDeleted &&
           other.deletedReasonCode == this.deletedReasonCode &&
           other.deletedDate == this.deletedDate &&
@@ -5167,12 +4918,6 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
   final Value<int> totalAmount;
   final Value<String> terms;
   final Value<String?> poNumber;
-  final Value<int> isPaid;
-  final Value<int?> amountPaid;
-  final Value<String?> paymentDate;
-  final Value<String?> paymentMethod;
-  final Value<String?> paymentReference;
-  final Value<String?> paymentNotes;
   final Value<int> isDeleted;
   final Value<String?> deletedReasonCode;
   final Value<String?> deletedDate;
@@ -5210,12 +4955,6 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
     this.totalAmount = const Value.absent(),
     this.terms = const Value.absent(),
     this.poNumber = const Value.absent(),
-    this.isPaid = const Value.absent(),
-    this.amountPaid = const Value.absent(),
-    this.paymentDate = const Value.absent(),
-    this.paymentMethod = const Value.absent(),
-    this.paymentReference = const Value.absent(),
-    this.paymentNotes = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.deletedReasonCode = const Value.absent(),
     this.deletedDate = const Value.absent(),
@@ -5254,12 +4993,6 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
     this.totalAmount = const Value.absent(),
     this.terms = const Value.absent(),
     this.poNumber = const Value.absent(),
-    this.isPaid = const Value.absent(),
-    this.amountPaid = const Value.absent(),
-    this.paymentDate = const Value.absent(),
-    this.paymentMethod = const Value.absent(),
-    this.paymentReference = const Value.absent(),
-    this.paymentNotes = const Value.absent(),
     this.isDeleted = const Value.absent(),
     this.deletedReasonCode = const Value.absent(),
     this.deletedDate = const Value.absent(),
@@ -5301,12 +5034,6 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
     Expression<int>? totalAmount,
     Expression<String>? terms,
     Expression<String>? poNumber,
-    Expression<int>? isPaid,
-    Expression<int>? amountPaid,
-    Expression<String>? paymentDate,
-    Expression<String>? paymentMethod,
-    Expression<String>? paymentReference,
-    Expression<String>? paymentNotes,
     Expression<int>? isDeleted,
     Expression<String>? deletedReasonCode,
     Expression<String>? deletedDate,
@@ -5350,12 +5077,6 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
       if (totalAmount != null) 'total_amount': totalAmount,
       if (terms != null) 'terms': terms,
       if (poNumber != null) 'po_number': poNumber,
-      if (isPaid != null) 'is_paid': isPaid,
-      if (amountPaid != null) 'amount_paid': amountPaid,
-      if (paymentDate != null) 'payment_date': paymentDate,
-      if (paymentMethod != null) 'payment_method': paymentMethod,
-      if (paymentReference != null) 'payment_reference': paymentReference,
-      if (paymentNotes != null) 'payment_notes': paymentNotes,
       if (isDeleted != null) 'is_deleted': isDeleted,
       if (deletedReasonCode != null) 'deleted_reason_code': deletedReasonCode,
       if (deletedDate != null) 'deleted_date': deletedDate,
@@ -5397,12 +5118,6 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
     Value<int>? totalAmount,
     Value<String>? terms,
     Value<String?>? poNumber,
-    Value<int>? isPaid,
-    Value<int?>? amountPaid,
-    Value<String?>? paymentDate,
-    Value<String?>? paymentMethod,
-    Value<String?>? paymentReference,
-    Value<String?>? paymentNotes,
     Value<int>? isDeleted,
     Value<String?>? deletedReasonCode,
     Value<String?>? deletedDate,
@@ -5444,12 +5159,6 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
       totalAmount: totalAmount ?? this.totalAmount,
       terms: terms ?? this.terms,
       poNumber: poNumber ?? this.poNumber,
-      isPaid: isPaid ?? this.isPaid,
-      amountPaid: amountPaid ?? this.amountPaid,
-      paymentDate: paymentDate ?? this.paymentDate,
-      paymentMethod: paymentMethod ?? this.paymentMethod,
-      paymentReference: paymentReference ?? this.paymentReference,
-      paymentNotes: paymentNotes ?? this.paymentNotes,
       isDeleted: isDeleted ?? this.isDeleted,
       deletedReasonCode: deletedReasonCode ?? this.deletedReasonCode,
       deletedDate: deletedDate ?? this.deletedDate,
@@ -5551,24 +5260,6 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
     if (poNumber.present) {
       map['po_number'] = Variable<String>(poNumber.value);
     }
-    if (isPaid.present) {
-      map['is_paid'] = Variable<int>(isPaid.value);
-    }
-    if (amountPaid.present) {
-      map['amount_paid'] = Variable<int>(amountPaid.value);
-    }
-    if (paymentDate.present) {
-      map['payment_date'] = Variable<String>(paymentDate.value);
-    }
-    if (paymentMethod.present) {
-      map['payment_method'] = Variable<String>(paymentMethod.value);
-    }
-    if (paymentReference.present) {
-      map['payment_reference'] = Variable<String>(paymentReference.value);
-    }
-    if (paymentNotes.present) {
-      map['payment_notes'] = Variable<String>(paymentNotes.value);
-    }
     if (isDeleted.present) {
       map['is_deleted'] = Variable<int>(isDeleted.value);
     }
@@ -5633,12 +5324,6 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
           ..write('totalAmount: $totalAmount, ')
           ..write('terms: $terms, ')
           ..write('poNumber: $poNumber, ')
-          ..write('isPaid: $isPaid, ')
-          ..write('amountPaid: $amountPaid, ')
-          ..write('paymentDate: $paymentDate, ')
-          ..write('paymentMethod: $paymentMethod, ')
-          ..write('paymentReference: $paymentReference, ')
-          ..write('paymentNotes: $paymentNotes, ')
           ..write('isDeleted: $isDeleted, ')
           ..write('deletedReasonCode: $deletedReasonCode, ')
           ..write('deletedDate: $deletedDate, ')
@@ -5649,6 +5334,737 @@ class InvoicesCompanion extends UpdateCompanion<DbInvoice> {
           ..write('workDescription: $workDescription, ')
           ..write('isSent: $isSent, ')
           ..write('invoiceType: $invoiceType')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $InvoicePaymentsTable extends InvoicePayments
+    with TableInfo<$InvoicePaymentsTable, DbInvoicePayment> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InvoicePaymentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _invoiceIdMeta = const VerificationMeta(
+    'invoiceId',
+  );
+  @override
+  late final GeneratedColumn<int> invoiceId = GeneratedColumn<int>(
+    'invoice_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES invoices (id)',
+    ),
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<int> amount = GeneratedColumn<int>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _paymentDateMeta = const VerificationMeta(
+    'paymentDate',
+  );
+  @override
+  late final GeneratedColumn<String> paymentDate = GeneratedColumn<String>(
+    'payment_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _paymentMethodMeta = const VerificationMeta(
+    'paymentMethod',
+  );
+  @override
+  late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
+    'payment_method',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _paymentReferenceMeta = const VerificationMeta(
+    'paymentReference',
+  );
+  @override
+  late final GeneratedColumn<String> paymentReference = GeneratedColumn<String>(
+    'payment_reference',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _paymentNotesMeta = const VerificationMeta(
+    'paymentNotes',
+  );
+  @override
+  late final GeneratedColumn<String> paymentNotes = GeneratedColumn<String>(
+    'payment_notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isVoidMeta = const VerificationMeta('isVoid');
+  @override
+  late final GeneratedColumn<int> isVoid = GeneratedColumn<int>(
+    'is_void',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _voidReasonCodeMeta = const VerificationMeta(
+    'voidReasonCode',
+  );
+  @override
+  late final GeneratedColumn<String> voidReasonCode = GeneratedColumn<String>(
+    'void_reason_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _voidDateMeta = const VerificationMeta(
+    'voidDate',
+  );
+  @override
+  late final GeneratedColumn<String> voidDate = GeneratedColumn<String>(
+    'void_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _voidNotesMeta = const VerificationMeta(
+    'voidNotes',
+  );
+  @override
+  late final GeneratedColumn<String> voidNotes = GeneratedColumn<String>(
+    'void_notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    invoiceId,
+    amount,
+    paymentDate,
+    paymentMethod,
+    paymentReference,
+    paymentNotes,
+    isVoid,
+    voidReasonCode,
+    voidDate,
+    voidNotes,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'invoice_payments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<DbInvoicePayment> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('invoice_id')) {
+      context.handle(
+        _invoiceIdMeta,
+        invoiceId.isAcceptableOrUnknown(data['invoice_id']!, _invoiceIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_invoiceIdMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('payment_date')) {
+      context.handle(
+        _paymentDateMeta,
+        paymentDate.isAcceptableOrUnknown(
+          data['payment_date']!,
+          _paymentDateMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_paymentDateMeta);
+    }
+    if (data.containsKey('payment_method')) {
+      context.handle(
+        _paymentMethodMeta,
+        paymentMethod.isAcceptableOrUnknown(
+          data['payment_method']!,
+          _paymentMethodMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payment_reference')) {
+      context.handle(
+        _paymentReferenceMeta,
+        paymentReference.isAcceptableOrUnknown(
+          data['payment_reference']!,
+          _paymentReferenceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('payment_notes')) {
+      context.handle(
+        _paymentNotesMeta,
+        paymentNotes.isAcceptableOrUnknown(
+          data['payment_notes']!,
+          _paymentNotesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_void')) {
+      context.handle(
+        _isVoidMeta,
+        isVoid.isAcceptableOrUnknown(data['is_void']!, _isVoidMeta),
+      );
+    }
+    if (data.containsKey('void_reason_code')) {
+      context.handle(
+        _voidReasonCodeMeta,
+        voidReasonCode.isAcceptableOrUnknown(
+          data['void_reason_code']!,
+          _voidReasonCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('void_date')) {
+      context.handle(
+        _voidDateMeta,
+        voidDate.isAcceptableOrUnknown(data['void_date']!, _voidDateMeta),
+      );
+    }
+    if (data.containsKey('void_notes')) {
+      context.handle(
+        _voidNotesMeta,
+        voidNotes.isAcceptableOrUnknown(data['void_notes']!, _voidNotesMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  DbInvoicePayment map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DbInvoicePayment(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      invoiceId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}invoice_id'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}amount'],
+      )!,
+      paymentDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_date'],
+      )!,
+      paymentMethod: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_method'],
+      ),
+      paymentReference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_reference'],
+      ),
+      paymentNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_notes'],
+      ),
+      isVoid: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}is_void'],
+      )!,
+      voidReasonCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}void_reason_code'],
+      ),
+      voidDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}void_date'],
+      ),
+      voidNotes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}void_notes'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $InvoicePaymentsTable createAlias(String alias) {
+    return $InvoicePaymentsTable(attachedDatabase, alias);
+  }
+}
+
+class DbInvoicePayment extends DataClass
+    implements Insertable<DbInvoicePayment> {
+  final int id;
+  final int invoiceId;
+
+  /// Payment amount in cents.
+  final int amount;
+  final String paymentDate;
+  final String? paymentMethod;
+  final String? paymentReference;
+  final String? paymentNotes;
+  final int isVoid;
+  final String? voidReasonCode;
+  final String? voidDate;
+  final String? voidNotes;
+  final String createdAt;
+  const DbInvoicePayment({
+    required this.id,
+    required this.invoiceId,
+    required this.amount,
+    required this.paymentDate,
+    this.paymentMethod,
+    this.paymentReference,
+    this.paymentNotes,
+    required this.isVoid,
+    this.voidReasonCode,
+    this.voidDate,
+    this.voidNotes,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['invoice_id'] = Variable<int>(invoiceId);
+    map['amount'] = Variable<int>(amount);
+    map['payment_date'] = Variable<String>(paymentDate);
+    if (!nullToAbsent || paymentMethod != null) {
+      map['payment_method'] = Variable<String>(paymentMethod);
+    }
+    if (!nullToAbsent || paymentReference != null) {
+      map['payment_reference'] = Variable<String>(paymentReference);
+    }
+    if (!nullToAbsent || paymentNotes != null) {
+      map['payment_notes'] = Variable<String>(paymentNotes);
+    }
+    map['is_void'] = Variable<int>(isVoid);
+    if (!nullToAbsent || voidReasonCode != null) {
+      map['void_reason_code'] = Variable<String>(voidReasonCode);
+    }
+    if (!nullToAbsent || voidDate != null) {
+      map['void_date'] = Variable<String>(voidDate);
+    }
+    if (!nullToAbsent || voidNotes != null) {
+      map['void_notes'] = Variable<String>(voidNotes);
+    }
+    map['created_at'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  InvoicePaymentsCompanion toCompanion(bool nullToAbsent) {
+    return InvoicePaymentsCompanion(
+      id: Value(id),
+      invoiceId: Value(invoiceId),
+      amount: Value(amount),
+      paymentDate: Value(paymentDate),
+      paymentMethod: paymentMethod == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentMethod),
+      paymentReference: paymentReference == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentReference),
+      paymentNotes: paymentNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentNotes),
+      isVoid: Value(isVoid),
+      voidReasonCode: voidReasonCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voidReasonCode),
+      voidDate: voidDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voidDate),
+      voidNotes: voidNotes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voidNotes),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory DbInvoicePayment.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DbInvoicePayment(
+      id: serializer.fromJson<int>(json['id']),
+      invoiceId: serializer.fromJson<int>(json['invoiceId']),
+      amount: serializer.fromJson<int>(json['amount']),
+      paymentDate: serializer.fromJson<String>(json['paymentDate']),
+      paymentMethod: serializer.fromJson<String?>(json['paymentMethod']),
+      paymentReference: serializer.fromJson<String?>(json['paymentReference']),
+      paymentNotes: serializer.fromJson<String?>(json['paymentNotes']),
+      isVoid: serializer.fromJson<int>(json['isVoid']),
+      voidReasonCode: serializer.fromJson<String?>(json['voidReasonCode']),
+      voidDate: serializer.fromJson<String?>(json['voidDate']),
+      voidNotes: serializer.fromJson<String?>(json['voidNotes']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'invoiceId': serializer.toJson<int>(invoiceId),
+      'amount': serializer.toJson<int>(amount),
+      'paymentDate': serializer.toJson<String>(paymentDate),
+      'paymentMethod': serializer.toJson<String?>(paymentMethod),
+      'paymentReference': serializer.toJson<String?>(paymentReference),
+      'paymentNotes': serializer.toJson<String?>(paymentNotes),
+      'isVoid': serializer.toJson<int>(isVoid),
+      'voidReasonCode': serializer.toJson<String?>(voidReasonCode),
+      'voidDate': serializer.toJson<String?>(voidDate),
+      'voidNotes': serializer.toJson<String?>(voidNotes),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  DbInvoicePayment copyWith({
+    int? id,
+    int? invoiceId,
+    int? amount,
+    String? paymentDate,
+    Value<String?> paymentMethod = const Value.absent(),
+    Value<String?> paymentReference = const Value.absent(),
+    Value<String?> paymentNotes = const Value.absent(),
+    int? isVoid,
+    Value<String?> voidReasonCode = const Value.absent(),
+    Value<String?> voidDate = const Value.absent(),
+    Value<String?> voidNotes = const Value.absent(),
+    String? createdAt,
+  }) => DbInvoicePayment(
+    id: id ?? this.id,
+    invoiceId: invoiceId ?? this.invoiceId,
+    amount: amount ?? this.amount,
+    paymentDate: paymentDate ?? this.paymentDate,
+    paymentMethod: paymentMethod.present
+        ? paymentMethod.value
+        : this.paymentMethod,
+    paymentReference: paymentReference.present
+        ? paymentReference.value
+        : this.paymentReference,
+    paymentNotes: paymentNotes.present ? paymentNotes.value : this.paymentNotes,
+    isVoid: isVoid ?? this.isVoid,
+    voidReasonCode: voidReasonCode.present
+        ? voidReasonCode.value
+        : this.voidReasonCode,
+    voidDate: voidDate.present ? voidDate.value : this.voidDate,
+    voidNotes: voidNotes.present ? voidNotes.value : this.voidNotes,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  DbInvoicePayment copyWithCompanion(InvoicePaymentsCompanion data) {
+    return DbInvoicePayment(
+      id: data.id.present ? data.id.value : this.id,
+      invoiceId: data.invoiceId.present ? data.invoiceId.value : this.invoiceId,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      paymentDate: data.paymentDate.present
+          ? data.paymentDate.value
+          : this.paymentDate,
+      paymentMethod: data.paymentMethod.present
+          ? data.paymentMethod.value
+          : this.paymentMethod,
+      paymentReference: data.paymentReference.present
+          ? data.paymentReference.value
+          : this.paymentReference,
+      paymentNotes: data.paymentNotes.present
+          ? data.paymentNotes.value
+          : this.paymentNotes,
+      isVoid: data.isVoid.present ? data.isVoid.value : this.isVoid,
+      voidReasonCode: data.voidReasonCode.present
+          ? data.voidReasonCode.value
+          : this.voidReasonCode,
+      voidDate: data.voidDate.present ? data.voidDate.value : this.voidDate,
+      voidNotes: data.voidNotes.present ? data.voidNotes.value : this.voidNotes,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DbInvoicePayment(')
+          ..write('id: $id, ')
+          ..write('invoiceId: $invoiceId, ')
+          ..write('amount: $amount, ')
+          ..write('paymentDate: $paymentDate, ')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('paymentReference: $paymentReference, ')
+          ..write('paymentNotes: $paymentNotes, ')
+          ..write('isVoid: $isVoid, ')
+          ..write('voidReasonCode: $voidReasonCode, ')
+          ..write('voidDate: $voidDate, ')
+          ..write('voidNotes: $voidNotes, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    invoiceId,
+    amount,
+    paymentDate,
+    paymentMethod,
+    paymentReference,
+    paymentNotes,
+    isVoid,
+    voidReasonCode,
+    voidDate,
+    voidNotes,
+    createdAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DbInvoicePayment &&
+          other.id == this.id &&
+          other.invoiceId == this.invoiceId &&
+          other.amount == this.amount &&
+          other.paymentDate == this.paymentDate &&
+          other.paymentMethod == this.paymentMethod &&
+          other.paymentReference == this.paymentReference &&
+          other.paymentNotes == this.paymentNotes &&
+          other.isVoid == this.isVoid &&
+          other.voidReasonCode == this.voidReasonCode &&
+          other.voidDate == this.voidDate &&
+          other.voidNotes == this.voidNotes &&
+          other.createdAt == this.createdAt);
+}
+
+class InvoicePaymentsCompanion extends UpdateCompanion<DbInvoicePayment> {
+  final Value<int> id;
+  final Value<int> invoiceId;
+  final Value<int> amount;
+  final Value<String> paymentDate;
+  final Value<String?> paymentMethod;
+  final Value<String?> paymentReference;
+  final Value<String?> paymentNotes;
+  final Value<int> isVoid;
+  final Value<String?> voidReasonCode;
+  final Value<String?> voidDate;
+  final Value<String?> voidNotes;
+  final Value<String> createdAt;
+  const InvoicePaymentsCompanion({
+    this.id = const Value.absent(),
+    this.invoiceId = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.paymentDate = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
+    this.paymentReference = const Value.absent(),
+    this.paymentNotes = const Value.absent(),
+    this.isVoid = const Value.absent(),
+    this.voidReasonCode = const Value.absent(),
+    this.voidDate = const Value.absent(),
+    this.voidNotes = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  InvoicePaymentsCompanion.insert({
+    this.id = const Value.absent(),
+    required int invoiceId,
+    required int amount,
+    required String paymentDate,
+    this.paymentMethod = const Value.absent(),
+    this.paymentReference = const Value.absent(),
+    this.paymentNotes = const Value.absent(),
+    this.isVoid = const Value.absent(),
+    this.voidReasonCode = const Value.absent(),
+    this.voidDate = const Value.absent(),
+    this.voidNotes = const Value.absent(),
+    required String createdAt,
+  }) : invoiceId = Value(invoiceId),
+       amount = Value(amount),
+       paymentDate = Value(paymentDate),
+       createdAt = Value(createdAt);
+  static Insertable<DbInvoicePayment> custom({
+    Expression<int>? id,
+    Expression<int>? invoiceId,
+    Expression<int>? amount,
+    Expression<String>? paymentDate,
+    Expression<String>? paymentMethod,
+    Expression<String>? paymentReference,
+    Expression<String>? paymentNotes,
+    Expression<int>? isVoid,
+    Expression<String>? voidReasonCode,
+    Expression<String>? voidDate,
+    Expression<String>? voidNotes,
+    Expression<String>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (invoiceId != null) 'invoice_id': invoiceId,
+      if (amount != null) 'amount': amount,
+      if (paymentDate != null) 'payment_date': paymentDate,
+      if (paymentMethod != null) 'payment_method': paymentMethod,
+      if (paymentReference != null) 'payment_reference': paymentReference,
+      if (paymentNotes != null) 'payment_notes': paymentNotes,
+      if (isVoid != null) 'is_void': isVoid,
+      if (voidReasonCode != null) 'void_reason_code': voidReasonCode,
+      if (voidDate != null) 'void_date': voidDate,
+      if (voidNotes != null) 'void_notes': voidNotes,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  InvoicePaymentsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? invoiceId,
+    Value<int>? amount,
+    Value<String>? paymentDate,
+    Value<String?>? paymentMethod,
+    Value<String?>? paymentReference,
+    Value<String?>? paymentNotes,
+    Value<int>? isVoid,
+    Value<String?>? voidReasonCode,
+    Value<String?>? voidDate,
+    Value<String?>? voidNotes,
+    Value<String>? createdAt,
+  }) {
+    return InvoicePaymentsCompanion(
+      id: id ?? this.id,
+      invoiceId: invoiceId ?? this.invoiceId,
+      amount: amount ?? this.amount,
+      paymentDate: paymentDate ?? this.paymentDate,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      paymentReference: paymentReference ?? this.paymentReference,
+      paymentNotes: paymentNotes ?? this.paymentNotes,
+      isVoid: isVoid ?? this.isVoid,
+      voidReasonCode: voidReasonCode ?? this.voidReasonCode,
+      voidDate: voidDate ?? this.voidDate,
+      voidNotes: voidNotes ?? this.voidNotes,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (invoiceId.present) {
+      map['invoice_id'] = Variable<int>(invoiceId.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<int>(amount.value);
+    }
+    if (paymentDate.present) {
+      map['payment_date'] = Variable<String>(paymentDate.value);
+    }
+    if (paymentMethod.present) {
+      map['payment_method'] = Variable<String>(paymentMethod.value);
+    }
+    if (paymentReference.present) {
+      map['payment_reference'] = Variable<String>(paymentReference.value);
+    }
+    if (paymentNotes.present) {
+      map['payment_notes'] = Variable<String>(paymentNotes.value);
+    }
+    if (isVoid.present) {
+      map['is_void'] = Variable<int>(isVoid.value);
+    }
+    if (voidReasonCode.present) {
+      map['void_reason_code'] = Variable<String>(voidReasonCode.value);
+    }
+    if (voidDate.present) {
+      map['void_date'] = Variable<String>(voidDate.value);
+    }
+    if (voidNotes.present) {
+      map['void_notes'] = Variable<String>(voidNotes.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InvoicePaymentsCompanion(')
+          ..write('id: $id, ')
+          ..write('invoiceId: $invoiceId, ')
+          ..write('amount: $amount, ')
+          ..write('paymentDate: $paymentDate, ')
+          ..write('paymentMethod: $paymentMethod, ')
+          ..write('paymentReference: $paymentReference, ')
+          ..write('paymentNotes: $paymentNotes, ')
+          ..write('isVoid: $isVoid, ')
+          ..write('voidReasonCode: $voidReasonCode, ')
+          ..write('voidDate: $voidDate, ')
+          ..write('voidNotes: $voidNotes, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
@@ -9335,11 +9751,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ExpenseCategoriesTable expenseCategories =
       $ExpenseCategoriesTable(this);
   late final $InvoicesTable invoices = $InvoicesTable(this);
+  late final $InvoicePaymentsTable invoicePayments = $InvoicePaymentsTable(
+    this,
+  );
   late final $TimeEntriesTable timeEntries = $TimeEntriesTable(this);
   late final $MaterialsTable materials = $MaterialsTable(this);
   late final $CompanySettingsTableTable companySettingsTable =
       $CompanySettingsTableTable(this);
   late final $WorkerPaymentsTable workerPayments = $WorkerPaymentsTable(this);
+  late final Index idxInvoicePaymentsInvoice = Index(
+    'idx_invoice_payments_invoice',
+    'CREATE INDEX idx_invoice_payments_invoice ON invoice_payments (invoice_id)',
+  );
   late final SettingsDao settingsDao = SettingsDao(this as AppDatabase);
   late final ClientsDao clientsDao = ClientsDao(this as AppDatabase);
   late final ProjectsDao projectsDao = ProjectsDao(this as AppDatabase);
@@ -9350,6 +9773,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     this as AppDatabase,
   );
   late final InvoicesDao invoicesDao = InvoicesDao(this as AppDatabase);
+  late final InvoicePaymentsDao invoicePaymentsDao = InvoicePaymentsDao(
+    this as AppDatabase,
+  );
   late final TimeEntriesDao timeEntriesDao = TimeEntriesDao(
     this as AppDatabase,
   );
@@ -9373,10 +9799,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     costCodes,
     expenseCategories,
     invoices,
+    invoicePayments,
     timeEntries,
     materials,
     companySettingsTable,
     workerPayments,
+    idxInvoicePaymentsInvoice,
   ];
 }
 
@@ -12375,12 +12803,6 @@ typedef $$InvoicesTableCreateCompanionBuilder =
       Value<int> totalAmount,
       Value<String> terms,
       Value<String?> poNumber,
-      Value<int> isPaid,
-      Value<int?> amountPaid,
-      Value<String?> paymentDate,
-      Value<String?> paymentMethod,
-      Value<String?> paymentReference,
-      Value<String?> paymentNotes,
       Value<int> isDeleted,
       Value<String?> deletedReasonCode,
       Value<String?> deletedDate,
@@ -12420,12 +12842,6 @@ typedef $$InvoicesTableUpdateCompanionBuilder =
       Value<int> totalAmount,
       Value<String> terms,
       Value<String?> poNumber,
-      Value<int> isPaid,
-      Value<int?> amountPaid,
-      Value<String?> paymentDate,
-      Value<String?> paymentMethod,
-      Value<String?> paymentReference,
-      Value<String?> paymentNotes,
       Value<int> isDeleted,
       Value<String?> deletedReasonCode,
       Value<String?> deletedDate,
@@ -12494,6 +12910,29 @@ final class $$InvoicesTableReferences
     if (item == null) return manager;
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static MultiTypedResultKey<$InvoicePaymentsTable, List<DbInvoicePayment>>
+  _invoicePaymentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.invoicePayments,
+    aliasName: $_aliasNameGenerator(
+      db.invoices.id,
+      db.invoicePayments.invoiceId,
+    ),
+  );
+
+  $$InvoicePaymentsTableProcessedTableManager get invoicePaymentsRefs {
+    final manager = $$InvoicePaymentsTableTableManager(
+      $_db,
+      $_db.invoicePayments,
+    ).filter((f) => f.invoiceId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _invoicePaymentsRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 
@@ -12663,36 +13102,6 @@ class $$InvoicesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get isPaid => $composableBuilder(
-    column: $table.isPaid,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get amountPaid => $composableBuilder(
-    column: $table.amountPaid,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get paymentDate => $composableBuilder(
-    column: $table.paymentDate,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get paymentMethod => $composableBuilder(
-    column: $table.paymentMethod,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get paymentReference => $composableBuilder(
-    column: $table.paymentReference,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get paymentNotes => $composableBuilder(
-    column: $table.paymentNotes,
-    builder: (column) => ColumnFilters(column),
-  );
-
   ColumnFilters<int> get isDeleted => $composableBuilder(
     column: $table.isDeleted,
     builder: (column) => ColumnFilters(column),
@@ -12805,6 +13214,31 @@ class $$InvoicesTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> invoicePaymentsRefs(
+    Expression<bool> Function($$InvoicePaymentsTableFilterComposer f) f,
+  ) {
+    final $$InvoicePaymentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.invoicePayments,
+      getReferencedColumn: (t) => t.invoiceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoicePaymentsTableFilterComposer(
+            $db: $db,
+            $table: $db.invoicePayments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 
   Expression<bool> timeEntriesRefs(
@@ -12984,36 +13418,6 @@ class $$InvoicesTableOrderingComposer
 
   ColumnOrderings<String> get poNumber => $composableBuilder(
     column: $table.poNumber,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get isPaid => $composableBuilder(
-    column: $table.isPaid,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get amountPaid => $composableBuilder(
-    column: $table.amountPaid,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get paymentDate => $composableBuilder(
-    column: $table.paymentDate,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get paymentMethod => $composableBuilder(
-    column: $table.paymentMethod,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get paymentReference => $composableBuilder(
-    column: $table.paymentReference,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get paymentNotes => $composableBuilder(
-    column: $table.paymentNotes,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -13245,34 +13649,6 @@ class $$InvoicesTableAnnotationComposer
   GeneratedColumn<String> get poNumber =>
       $composableBuilder(column: $table.poNumber, builder: (column) => column);
 
-  GeneratedColumn<int> get isPaid =>
-      $composableBuilder(column: $table.isPaid, builder: (column) => column);
-
-  GeneratedColumn<int> get amountPaid => $composableBuilder(
-    column: $table.amountPaid,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get paymentDate => $composableBuilder(
-    column: $table.paymentDate,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get paymentMethod => $composableBuilder(
-    column: $table.paymentMethod,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get paymentReference => $composableBuilder(
-    column: $table.paymentReference,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get paymentNotes => $composableBuilder(
-    column: $table.paymentNotes,
-    builder: (column) => column,
-  );
-
   GeneratedColumn<int> get isDeleted =>
       $composableBuilder(column: $table.isDeleted, builder: (column) => column);
 
@@ -13381,6 +13757,31 @@ class $$InvoicesTableAnnotationComposer
     return composer;
   }
 
+  Expression<T> invoicePaymentsRefs<T extends Object>(
+    Expression<T> Function($$InvoicePaymentsTableAnnotationComposer a) f,
+  ) {
+    final $$InvoicePaymentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.invoicePayments,
+      getReferencedColumn: (t) => t.invoiceId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoicePaymentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.invoicePayments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
   Expression<T> timeEntriesRefs<T extends Object>(
     Expression<T> Function($$TimeEntriesTableAnnotationComposer a) f,
   ) {
@@ -13449,6 +13850,7 @@ class $$InvoicesTableTableManager
             bool clientId,
             bool projectId,
             bool supersededByInvoiceId,
+            bool invoicePaymentsRefs,
             bool timeEntriesRefs,
             bool materialsRefs,
           })
@@ -13492,12 +13894,6 @@ class $$InvoicesTableTableManager
                 Value<int> totalAmount = const Value.absent(),
                 Value<String> terms = const Value.absent(),
                 Value<String?> poNumber = const Value.absent(),
-                Value<int> isPaid = const Value.absent(),
-                Value<int?> amountPaid = const Value.absent(),
-                Value<String?> paymentDate = const Value.absent(),
-                Value<String?> paymentMethod = const Value.absent(),
-                Value<String?> paymentReference = const Value.absent(),
-                Value<String?> paymentNotes = const Value.absent(),
                 Value<int> isDeleted = const Value.absent(),
                 Value<String?> deletedReasonCode = const Value.absent(),
                 Value<String?> deletedDate = const Value.absent(),
@@ -13535,12 +13931,6 @@ class $$InvoicesTableTableManager
                 totalAmount: totalAmount,
                 terms: terms,
                 poNumber: poNumber,
-                isPaid: isPaid,
-                amountPaid: amountPaid,
-                paymentDate: paymentDate,
-                paymentMethod: paymentMethod,
-                paymentReference: paymentReference,
-                paymentNotes: paymentNotes,
                 isDeleted: isDeleted,
                 deletedReasonCode: deletedReasonCode,
                 deletedDate: deletedDate,
@@ -13580,12 +13970,6 @@ class $$InvoicesTableTableManager
                 Value<int> totalAmount = const Value.absent(),
                 Value<String> terms = const Value.absent(),
                 Value<String?> poNumber = const Value.absent(),
-                Value<int> isPaid = const Value.absent(),
-                Value<int?> amountPaid = const Value.absent(),
-                Value<String?> paymentDate = const Value.absent(),
-                Value<String?> paymentMethod = const Value.absent(),
-                Value<String?> paymentReference = const Value.absent(),
-                Value<String?> paymentNotes = const Value.absent(),
                 Value<int> isDeleted = const Value.absent(),
                 Value<String?> deletedReasonCode = const Value.absent(),
                 Value<String?> deletedDate = const Value.absent(),
@@ -13623,12 +14007,6 @@ class $$InvoicesTableTableManager
                 totalAmount: totalAmount,
                 terms: terms,
                 poNumber: poNumber,
-                isPaid: isPaid,
-                amountPaid: amountPaid,
-                paymentDate: paymentDate,
-                paymentMethod: paymentMethod,
-                paymentReference: paymentReference,
-                paymentNotes: paymentNotes,
                 isDeleted: isDeleted,
                 deletedReasonCode: deletedReasonCode,
                 deletedDate: deletedDate,
@@ -13653,12 +14031,14 @@ class $$InvoicesTableTableManager
                 clientId = false,
                 projectId = false,
                 supersededByInvoiceId = false,
+                invoicePaymentsRefs = false,
                 timeEntriesRefs = false,
                 materialsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (invoicePaymentsRefs) db.invoicePayments,
                     if (timeEntriesRefs) db.timeEntries,
                     if (materialsRefs) db.materials,
                   ],
@@ -13722,6 +14102,27 @@ class $$InvoicesTableTableManager
                       },
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (invoicePaymentsRefs)
+                        await $_getPrefetchedData<
+                          DbInvoice,
+                          $InvoicesTable,
+                          DbInvoicePayment
+                        >(
+                          currentTable: table,
+                          referencedTable: $$InvoicesTableReferences
+                              ._invoicePaymentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$InvoicesTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).invoicePaymentsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.invoiceId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (timeEntriesRefs)
                         await $_getPrefetchedData<
                           DbInvoice,
@@ -13788,9 +14189,475 @@ typedef $$InvoicesTableProcessedTableManager =
         bool clientId,
         bool projectId,
         bool supersededByInvoiceId,
+        bool invoicePaymentsRefs,
         bool timeEntriesRefs,
         bool materialsRefs,
       })
+    >;
+typedef $$InvoicePaymentsTableCreateCompanionBuilder =
+    InvoicePaymentsCompanion Function({
+      Value<int> id,
+      required int invoiceId,
+      required int amount,
+      required String paymentDate,
+      Value<String?> paymentMethod,
+      Value<String?> paymentReference,
+      Value<String?> paymentNotes,
+      Value<int> isVoid,
+      Value<String?> voidReasonCode,
+      Value<String?> voidDate,
+      Value<String?> voidNotes,
+      required String createdAt,
+    });
+typedef $$InvoicePaymentsTableUpdateCompanionBuilder =
+    InvoicePaymentsCompanion Function({
+      Value<int> id,
+      Value<int> invoiceId,
+      Value<int> amount,
+      Value<String> paymentDate,
+      Value<String?> paymentMethod,
+      Value<String?> paymentReference,
+      Value<String?> paymentNotes,
+      Value<int> isVoid,
+      Value<String?> voidReasonCode,
+      Value<String?> voidDate,
+      Value<String?> voidNotes,
+      Value<String> createdAt,
+    });
+
+final class $$InvoicePaymentsTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $InvoicePaymentsTable, DbInvoicePayment> {
+  $$InvoicePaymentsTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $InvoicesTable _invoiceIdTable(_$AppDatabase db) =>
+      db.invoices.createAlias(
+        $_aliasNameGenerator(db.invoicePayments.invoiceId, db.invoices.id),
+      );
+
+  $$InvoicesTableProcessedTableManager get invoiceId {
+    final $_column = $_itemColumn<int>('invoice_id')!;
+
+    final manager = $$InvoicesTableTableManager(
+      $_db,
+      $_db.invoices,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_invoiceIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$InvoicePaymentsTableFilterComposer
+    extends Composer<_$AppDatabase, $InvoicePaymentsTable> {
+  $$InvoicePaymentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentDate => $composableBuilder(
+    column: $table.paymentDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentReference => $composableBuilder(
+    column: $table.paymentReference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentNotes => $composableBuilder(
+    column: $table.paymentNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get isVoid => $composableBuilder(
+    column: $table.isVoid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get voidReasonCode => $composableBuilder(
+    column: $table.voidReasonCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get voidDate => $composableBuilder(
+    column: $table.voidDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get voidNotes => $composableBuilder(
+    column: $table.voidNotes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$InvoicesTableFilterComposer get invoiceId {
+    final $$InvoicesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.invoiceId,
+      referencedTable: $db.invoices,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoicesTableFilterComposer(
+            $db: $db,
+            $table: $db.invoices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InvoicePaymentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $InvoicePaymentsTable> {
+  $$InvoicePaymentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentDate => $composableBuilder(
+    column: $table.paymentDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentReference => $composableBuilder(
+    column: $table.paymentReference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentNotes => $composableBuilder(
+    column: $table.paymentNotes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get isVoid => $composableBuilder(
+    column: $table.isVoid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get voidReasonCode => $composableBuilder(
+    column: $table.voidReasonCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get voidDate => $composableBuilder(
+    column: $table.voidDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get voidNotes => $composableBuilder(
+    column: $table.voidNotes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$InvoicesTableOrderingComposer get invoiceId {
+    final $$InvoicesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.invoiceId,
+      referencedTable: $db.invoices,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoicesTableOrderingComposer(
+            $db: $db,
+            $table: $db.invoices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InvoicePaymentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InvoicePaymentsTable> {
+  $$InvoicePaymentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get paymentDate => $composableBuilder(
+    column: $table.paymentDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get paymentMethod => $composableBuilder(
+    column: $table.paymentMethod,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get paymentReference => $composableBuilder(
+    column: $table.paymentReference,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get paymentNotes => $composableBuilder(
+    column: $table.paymentNotes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get isVoid =>
+      $composableBuilder(column: $table.isVoid, builder: (column) => column);
+
+  GeneratedColumn<String> get voidReasonCode => $composableBuilder(
+    column: $table.voidReasonCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get voidDate =>
+      $composableBuilder(column: $table.voidDate, builder: (column) => column);
+
+  GeneratedColumn<String> get voidNotes =>
+      $composableBuilder(column: $table.voidNotes, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$InvoicesTableAnnotationComposer get invoiceId {
+    final $$InvoicesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.invoiceId,
+      referencedTable: $db.invoices,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$InvoicesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.invoices,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$InvoicePaymentsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $InvoicePaymentsTable,
+          DbInvoicePayment,
+          $$InvoicePaymentsTableFilterComposer,
+          $$InvoicePaymentsTableOrderingComposer,
+          $$InvoicePaymentsTableAnnotationComposer,
+          $$InvoicePaymentsTableCreateCompanionBuilder,
+          $$InvoicePaymentsTableUpdateCompanionBuilder,
+          (DbInvoicePayment, $$InvoicePaymentsTableReferences),
+          DbInvoicePayment,
+          PrefetchHooks Function({bool invoiceId})
+        > {
+  $$InvoicePaymentsTableTableManager(
+    _$AppDatabase db,
+    $InvoicePaymentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InvoicePaymentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InvoicePaymentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InvoicePaymentsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> invoiceId = const Value.absent(),
+                Value<int> amount = const Value.absent(),
+                Value<String> paymentDate = const Value.absent(),
+                Value<String?> paymentMethod = const Value.absent(),
+                Value<String?> paymentReference = const Value.absent(),
+                Value<String?> paymentNotes = const Value.absent(),
+                Value<int> isVoid = const Value.absent(),
+                Value<String?> voidReasonCode = const Value.absent(),
+                Value<String?> voidDate = const Value.absent(),
+                Value<String?> voidNotes = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+              }) => InvoicePaymentsCompanion(
+                id: id,
+                invoiceId: invoiceId,
+                amount: amount,
+                paymentDate: paymentDate,
+                paymentMethod: paymentMethod,
+                paymentReference: paymentReference,
+                paymentNotes: paymentNotes,
+                isVoid: isVoid,
+                voidReasonCode: voidReasonCode,
+                voidDate: voidDate,
+                voidNotes: voidNotes,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int invoiceId,
+                required int amount,
+                required String paymentDate,
+                Value<String?> paymentMethod = const Value.absent(),
+                Value<String?> paymentReference = const Value.absent(),
+                Value<String?> paymentNotes = const Value.absent(),
+                Value<int> isVoid = const Value.absent(),
+                Value<String?> voidReasonCode = const Value.absent(),
+                Value<String?> voidDate = const Value.absent(),
+                Value<String?> voidNotes = const Value.absent(),
+                required String createdAt,
+              }) => InvoicePaymentsCompanion.insert(
+                id: id,
+                invoiceId: invoiceId,
+                amount: amount,
+                paymentDate: paymentDate,
+                paymentMethod: paymentMethod,
+                paymentReference: paymentReference,
+                paymentNotes: paymentNotes,
+                isVoid: isVoid,
+                voidReasonCode: voidReasonCode,
+                voidDate: voidDate,
+                voidNotes: voidNotes,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$InvoicePaymentsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({invoiceId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (invoiceId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.invoiceId,
+                                referencedTable:
+                                    $$InvoicePaymentsTableReferences
+                                        ._invoiceIdTable(db),
+                                referencedColumn:
+                                    $$InvoicePaymentsTableReferences
+                                        ._invoiceIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$InvoicePaymentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $InvoicePaymentsTable,
+      DbInvoicePayment,
+      $$InvoicePaymentsTableFilterComposer,
+      $$InvoicePaymentsTableOrderingComposer,
+      $$InvoicePaymentsTableAnnotationComposer,
+      $$InvoicePaymentsTableCreateCompanionBuilder,
+      $$InvoicePaymentsTableUpdateCompanionBuilder,
+      (DbInvoicePayment, $$InvoicePaymentsTableReferences),
+      DbInvoicePayment,
+      PrefetchHooks Function({bool invoiceId})
     >;
 typedef $$TimeEntriesTableCreateCompanionBuilder =
     TimeEntriesCompanion Function({
@@ -16293,6 +17160,8 @@ class $AppDatabaseManager {
       $$ExpenseCategoriesTableTableManager(_db, _db.expenseCategories);
   $$InvoicesTableTableManager get invoices =>
       $$InvoicesTableTableManager(_db, _db.invoices);
+  $$InvoicePaymentsTableTableManager get invoicePayments =>
+      $$InvoicePaymentsTableTableManager(_db, _db.invoicePayments);
   $$TimeEntriesTableTableManager get timeEntries =>
       $$TimeEntriesTableTableManager(_db, _db.timeEntries);
   $$MaterialsTableTableManager get materials =>

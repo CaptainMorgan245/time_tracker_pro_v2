@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../providers/client_project_providers.dart';
 import '../../providers/invoice_providers.dart';
 import '../../widgets/async_value_view.dart';
 import 'invoice_detail_screen.dart';
+import 'invoices/fixed_price_invoice_screen.dart';
+import 'invoices/time_materials_invoice_screen.dart';
 
 final _currency = NumberFormat.currency(symbol: '\$');
 String _fmtDate(String iso) {
@@ -77,7 +80,7 @@ class InvoicesScreen extends ConsumerWidget {
                     label: 'Fixed Price Invoice',
                     icon: Icons.add,
                     color: Colors.blue.shade700,
-                    onPressed: () => _snack(context, 'Coming in Phase 2'),
+                    onPressed: () => _newFixedPriceInvoice(context, ref),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -87,7 +90,7 @@ class InvoicesScreen extends ConsumerWidget {
                     label: 'Time & Materials Invoice',
                     icon: Icons.checklist,
                     color: Colors.orange.shade700,
-                    onPressed: () => _snack(context, 'Coming in Phase 2'),
+                    onPressed: () => _newTimeMaterialsInvoice(context, ref),
                   ),
                 ),
               ],
@@ -136,6 +139,127 @@ class InvoicesScreen extends ConsumerWidget {
 
   void _snack(BuildContext context, String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  /// Picks a fixed-price project, then opens the create screen for it. Fixed
+  /// Price Invoice is project-scoped, but the button is global, so selection
+  /// happens here first.
+  void _newFixedPriceInvoice(BuildContext context, WidgetRef ref) {
+    // Distinguish "still loading" from "genuinely none" — the button can be
+    // tapped before the projects/clients streams have emitted, and a null here
+    // would otherwise read as an empty project list.
+    final projects = ref
+        .read(projectsStreamProvider)
+        .maybeWhen(data: (v) => v, orElse: () => null);
+    final clients = ref
+        .read(clientsStreamProvider)
+        .maybeWhen(data: (v) => v, orElse: () => null);
+    if (projects == null || clients == null) {
+      _snack(context, 'Projects are still loading — try again in a moment.');
+      return;
+    }
+
+    final clientName = {for (final c in clients) c.id: c.name};
+    final fixed = projects
+        .where((p) =>
+            p.pricingModel == 'fixed' &&
+            (p.projectPrice ?? 0) > 0 &&
+            p.isInternal == 0)
+        .toList()
+      ..sort((a, b) => a.projectName.compareTo(b.projectName));
+
+    if (fixed.isEmpty) {
+      _snack(context, 'No fixed-price projects to invoice.');
+      return;
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetCtx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Select a fixed-price project',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            for (final p in fixed)
+              ListTile(
+                title: Text(p.projectName),
+                subtitle: Text(clientName[p.clientId] ?? ''),
+                trailing:
+                    Text(_currency.format((p.projectPrice ?? 0) / 100)),
+                onTap: () {
+                  Navigator.of(sheetCtx).pop();
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) =>
+                        FixedPriceInvoiceScreen(projectId: p.id),
+                  ));
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Picks a project, then opens the Time & Materials create screen for it. Any
+  /// non-internal project may have unbilled time/materials; the screen shows an
+  /// empty state if it has none.
+  void _newTimeMaterialsInvoice(BuildContext context, WidgetRef ref) {
+    final projects = ref
+        .read(projectsStreamProvider)
+        .maybeWhen(data: (v) => v, orElse: () => null);
+    final clients = ref
+        .read(clientsStreamProvider)
+        .maybeWhen(data: (v) => v, orElse: () => null);
+    if (projects == null || clients == null) {
+      _snack(context, 'Projects are still loading — try again in a moment.');
+      return;
+    }
+
+    final clientName = {for (final c in clients) c.id: c.name};
+    final selectable = projects
+        .where((p) =>
+            p.pricingModel == 'hourly' &&
+            p.isCompleted == 0 &&
+            p.isInternal == 0)
+        .toList()
+      ..sort((a, b) => a.projectName.compareTo(b.projectName));
+
+    if (selectable.isEmpty) {
+      _snack(context, 'No projects to invoice.');
+      return;
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetCtx) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Select a project',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            for (final p in selectable)
+              ListTile(
+                title: Text(p.projectName),
+                subtitle: Text(clientName[p.clientId] ?? ''),
+                onTap: () {
+                  Navigator.of(sheetCtx).pop();
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) =>
+                        TimeMaterialsInvoiceScreen(projectId: p.id),
+                  ));
+                },
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   List<Widget> _group(BuildContext context, InvoiceProjectGroup g) {

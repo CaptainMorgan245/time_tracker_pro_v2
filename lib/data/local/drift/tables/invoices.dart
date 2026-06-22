@@ -3,10 +3,10 @@ import 'package:drift/drift.dart';
 import 'clients.dart';
 import 'projects.dart';
 
-/// Invoices. Payment state lives here as columns (`isPaid`, `amountPaid`,
-/// `paymentDate`, `paymentMethod`, `paymentReference`, `paymentNotes`) — there
-/// is no separate payments table. References [Clients], [Projects] and itself
-/// (`supersededByInvoiceId`). Row class: `DbInvoice`.
+/// Invoices. Payments live in a separate [InvoicePayments] table (one invoice →
+/// many payments); an invoice's amount paid is the sum of its non-void payment
+/// rows. References [Clients], [Projects] and itself (`supersededByInvoiceId`).
+/// Row class: `DbInvoice`.
 @DataClassName('DbInvoice')
 class Invoices extends Table {
   IntColumn get id => integer().autoIncrement()();
@@ -36,12 +36,6 @@ class Invoices extends Table {
   TextColumn get terms =>
       text().withDefault(const Constant('Payable on Receipt'))();
   TextColumn get poNumber => text().nullable()();
-  IntColumn get isPaid => integer().withDefault(const Constant(0))();
-  IntColumn get amountPaid => integer().nullable()();
-  TextColumn get paymentDate => text().nullable()();
-  TextColumn get paymentMethod => text().nullable()();
-  TextColumn get paymentReference => text().nullable()();
-  TextColumn get paymentNotes => text().nullable()();
   IntColumn get isDeleted => integer().withDefault(const Constant(0))();
   TextColumn get deletedReasonCode => text().nullable()();
   TextColumn get deletedDate => text().nullable()();

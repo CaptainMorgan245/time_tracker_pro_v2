@@ -9,6 +9,18 @@ final materialsStreamProvider = StreamProvider<List<DbMaterial>>((ref) {
   return ref.watch(databaseProvider).materialsDao.watchAll();
 });
 
+/// Unbilled, non-deleted materials/expenses for a project — the candidate lines
+/// for a new invoice (Phase 2). Keyed by projectId. Use this for invoice
+/// selection rather than [materialsStreamProvider], which is unfiltered
+/// (includes deleted and already-billed rows).
+final unbilledMaterialsProvider =
+    StreamProvider.family<List<DbMaterial>, int>((ref, projectId) {
+  return ref
+      .watch(databaseProvider)
+      .materialsDao
+      .watchUnbilledByProject(projectId);
+});
+
 /// Reactive list of expense categories (own table).
 final expenseCategoriesStreamProvider =
     StreamProvider<List<DbExpenseCategory>>((ref) {

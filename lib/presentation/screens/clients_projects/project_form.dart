@@ -131,28 +131,31 @@ class _ProjectFormState extends ConsumerState<ProjectForm> {
   Future<void> _toggleCompleted() async {
     final p = widget.existing!;
     final nowCompleted = p.isCompleted == 0;
-    await _db.projectsDao.updateRow(
-      ProjectsCompanion(
-        id: Value(p.id),
-        projectName: Value(p.projectName),
-        clientId: Value(p.clientId),
-        city: Value(p.city),
-        streetAddress: Value(p.streetAddress),
-        region: Value(p.region),
-        postalCode: Value(p.postalCode),
-        pricingModel: Value(p.pricingModel),
-        isCompleted: Value(nowCompleted ? 1 : 0),
-        completionDate:
-            Value(nowCompleted ? DateTime.now().toIso8601String() : null),
-        isInternal: Value(p.isInternal),
-        billedHourlyRate: Value(p.billedHourlyRate),
-        projectPrice: Value(p.projectPrice),
-        expenseMarkupPercentage: Value(p.expenseMarkupPercentage),
-        taxRate: Value(p.taxRate),
-        parentProjectId: Value(p.parentProjectId),
-      ),
-    );
-    if (mounted) Navigator.pop(context);
+    // Capture before the await + pop: after the dialog closes its own context
+    // is defunct, but these point at the app-level messenger/navigator.
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    try {
+      final rows = await _db.projectsDao.setCompleted(p.id, nowCompleted);
+      if (rows == 0) {
+        messenger.showSnackBar(const SnackBar(
+          content: Text('Update affected no rows — project not found.'),
+          backgroundColor: Colors.red,
+        ));
+        return;
+      }
+      navigator.pop();
+      messenger.showSnackBar(SnackBar(
+        content: Text(
+            nowCompleted ? 'Project marked complete.' : 'Project re-opened.'),
+        backgroundColor: Colors.green,
+      ));
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(
+        content: Text('Failed to update project: $e'),
+        backgroundColor: Colors.red,
+      ));
+    }
   }
 
   Future<void> _delete() async {
