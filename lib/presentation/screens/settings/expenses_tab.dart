@@ -106,8 +106,17 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Edit $title'),
+        // Renames the same values the add fields above create (expense
+        // categories, vehicle designations, vendors), so it follows the same
+        // rules: name-case hint except for vehicle designations, which are left
+        // exactly as typed, and never autocorrected.
         content: TextField(
           controller: controller,
+          textCapitalization: title == 'Vehicle Designation'
+              ? TextCapitalization.none
+              : TextCapitalization.words,
+          autocorrect: false,
+          enableSuggestions: false,
           decoration: InputDecoration(labelText: title),
         ),
         actions: [
@@ -159,6 +168,10 @@ class _ExpensesTabState extends ConsumerState<ExpensesTab> {
                 textCapitalization: applyCapitalization
                     ? TextCapitalization.words
                     : TextCapitalization.none,
+                // Vendor names and vehicle designations are both things the
+                // keyboard would happily "correct" into real words.
+                autocorrect: false,
+                enableSuggestions: false,
                 decoration: _dec(label),
               ),
               const SizedBox(height: 8),

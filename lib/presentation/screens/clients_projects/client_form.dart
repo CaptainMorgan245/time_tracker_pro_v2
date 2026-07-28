@@ -128,12 +128,16 @@ class _ClientFormState extends ConsumerState<ClientForm> {
             TextField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
+              autocorrect: false,
+              enableSuggestions: false,
               decoration: const InputDecoration(labelText: 'Client Name'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _contactController,
               textCapitalization: TextCapitalization.words,
+              autocorrect: false,
+              enableSuggestions: false,
               decoration: const InputDecoration(labelText: 'Contact Person'),
             ),
             const SizedBox(height: 12),

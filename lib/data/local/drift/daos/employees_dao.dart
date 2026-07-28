@@ -11,9 +11,17 @@ class EmployeesDao extends DatabaseAccessor<AppDatabase>
     with _$EmployeesDaoMixin {
   EmployeesDao(super.db);
 
-  Future<List<DbEmployee>> getAll() => select(employees).get();
+  /// Ordered by name, case-insensitively — see [_byName].
+  Future<List<DbEmployee>> getAll() => _byName().get();
 
-  Stream<List<DbEmployee>> watchAll() => select(employees).watch();
+  Stream<List<DbEmployee>> watchAll() => _byName().watch();
+
+  /// `SELECT … ORDER BY name COLLATE NOCASE`, so every employee picker and list
+  /// is alphabetical without each screen sorting for itself.
+  SimpleSelectStatement<$EmployeesTable, DbEmployee> _byName() =>
+      select(employees)
+        ..orderBy(
+            [(t) => OrderingTerm(expression: t.name.collate(Collate.noCase))]);
 
   Future<DbEmployee?> getById(int id) =>
       (select(employees)..where((t) => t.id.equals(id))).getSingleOrNull();

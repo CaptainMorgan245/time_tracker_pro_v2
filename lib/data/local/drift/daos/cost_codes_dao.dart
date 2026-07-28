@@ -11,9 +11,18 @@ class CostCodesDao extends DatabaseAccessor<AppDatabase>
     with _$CostCodesDaoMixin {
   CostCodesDao(super.db);
 
-  Future<List<DbCostCode>> getAll() => select(costCodes).get();
+  /// Ordered by name, case-insensitively — see [_byName]. The cost-codes
+  /// settings tab used to be the only screen that sorted this list (and the only
+  /// one that did so case-insensitively); now every cost-code picker matches it.
+  Future<List<DbCostCode>> getAll() => _byName().get();
 
-  Stream<List<DbCostCode>> watchAll() => select(costCodes).watch();
+  Stream<List<DbCostCode>> watchAll() => _byName().watch();
+
+  /// `SELECT … ORDER BY name COLLATE NOCASE`.
+  SimpleSelectStatement<$CostCodesTable, DbCostCode> _byName() =>
+      select(costCodes)
+        ..orderBy(
+            [(t) => OrderingTerm(expression: t.name.collate(Collate.noCase))]);
 
   Future<DbCostCode?> getById(int id) =>
       (select(costCodes)..where((t) => t.id.equals(id))).getSingleOrNull();

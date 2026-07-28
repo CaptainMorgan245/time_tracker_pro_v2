@@ -194,6 +194,8 @@ class _ProjectFormState extends ConsumerState<ProjectForm> {
               TextField(
                 controller: _nameController,
                 textCapitalization: TextCapitalization.words,
+                autocorrect: false,
+                enableSuggestions: false,
                 decoration: const InputDecoration(labelText: 'Project Name'),
               ),
               const SizedBox(height: 12),
@@ -237,6 +239,8 @@ class _ProjectFormState extends ConsumerState<ProjectForm> {
               TextField(
                 controller: _streetController,
                 textCapitalization: TextCapitalization.words,
+                autocorrect: false,
+                enableSuggestions: false,
                 decoration: const InputDecoration(labelText: 'Street Address'),
               ),
               const SizedBox(height: 12),
@@ -247,6 +251,8 @@ class _ProjectFormState extends ConsumerState<ProjectForm> {
                     child: TextField(
                       controller: _cityController,
                       textCapitalization: TextCapitalization.words,
+                      autocorrect: false,
+                      enableSuggestions: false,
                       decoration: const InputDecoration(labelText: 'City'),
                     ),
                   ),

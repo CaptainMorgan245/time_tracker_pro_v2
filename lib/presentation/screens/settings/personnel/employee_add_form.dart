@@ -100,6 +100,8 @@ class _AddEmployeeFormState extends ConsumerState<AddEmployeeForm> {
                   child: TextField(
                     controller: _nameController,
                     textCapitalization: TextCapitalization.words,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: _dec('Employee Name'),
                   ),
                 ),

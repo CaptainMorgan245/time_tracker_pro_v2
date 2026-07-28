@@ -9,10 +9,36 @@ final materialsStreamProvider = StreamProvider<List<DbMaterial>>((ref) {
   return ref.watch(databaseProvider).materialsDao.watchAll();
 });
 
-/// Unbilled, non-deleted materials/expenses for a project — the candidate lines
-/// for a new invoice (Phase 2). Keyed by projectId. Use this for invoice
-/// selection rather than [materialsStreamProvider], which is unfiltered
-/// (includes deleted and already-billed rows).
+/// Amount-lookup query for the Cost Entry tab (ported from v1). Empty = inactive
+/// (the records list shows the normal client/project-scoped expenses); non-empty
+/// = the list switches to a lookup across ALL non-deleted expenses whose
+/// formatted dollar amount starts with this text. Written by the dashboard
+/// app-bar search field, read by [CostEntryScreen].
+class CostEntryAmountSearch extends Notifier<String> {
+  @override
+  String build() => '';
+
+  void set(String query) => state = query;
+  void clear() => state = '';
+}
+
+final costEntryAmountSearchProvider =
+    NotifierProvider<CostEntryAmountSearch, String>(CostEntryAmountSearch.new);
+
+/// Results of the Cost Entry amount lookup for [query], via the DAO's ported v1
+/// `searchMaterialsByAmount`. Re-runs when the query or the materials table
+/// changes (the `watch` keeps the list live as expenses are added/edited/
+/// deleted — v1 refreshed the same way via its refresh key).
+final materialsByAmountProvider = FutureProvider.autoDispose
+    .family<List<DbMaterial>, String>((ref, query) {
+  ref.watch(materialsStreamProvider);
+  return ref.read(databaseProvider).materialsDao.searchMaterialsByAmount(query);
+});
+
+/// Raw unbilled, non-deleted materials/expenses for a project, keyed by
+/// projectId. Base feed only — it does NOT apply the T&M `is_billable` rule. For
+/// invoice selection use `invoiceableEntriesProvider` (in
+/// invoice_providers.dart), which filters this to billable-coded materials.
 final unbilledMaterialsProvider =
     StreamProvider.family<List<DbMaterial>, int>((ref, projectId) {
   return ref
@@ -34,28 +60,25 @@ final appSettingsStreamProvider = StreamProvider<DbSetting?>((ref) {
 });
 
 /// Splits a comma-joined settings string (vendors / vehicleDesignations) into a
-/// trimmed, non-empty list. Mirrors the Expenses settings tab encoding.
+/// trimmed, non-empty list, **sorted case-insensitively**. Mirrors the Expenses
+/// settings tab encoding.
+///
+/// Vendors and vehicle designations are stored as ONE CSV string on the settings
+/// row, not as tables, so unlike the six reference DAOs there is no `ORDER BY`
+/// for callers to inherit — the sort has to live here. Doing it here covers all
+/// three consumers at once: the Settings > Expenses editor and the vendor
+/// pickers on the cost-entry and edit-expense forms.
+///
+/// Safe for the Settings tab's index-based edit/delete: that screen mutates the
+/// same list it renders, so a displayed index always refers to the entry shown.
+/// One visible consequence — saving after an edit rewrites the stored CSV in
+/// sorted order.
 List<String> splitCsv(String? csv) => (csv ?? '')
     .split(',')
     .map((s) => s.trim())
     .where((s) => s.isNotEmpty)
-    .toList();
-
-/// The expense currently loaded into the inline cost-entry form for editing, or
-/// null when adding. The list's Edit icon sets this; the form listens to it to
-/// populate, and clears it on save/clear. `autoDispose` so the selection resets
-/// when the Cost Entry tab is left.
-class EditingMaterialNotifier extends Notifier<DbMaterial?> {
-  @override
-  DbMaterial? build() => null;
-
-  void set(DbMaterial? material) => state = material;
-}
-
-final editingMaterialProvider =
-    NotifierProvider.autoDispose<EditingMaterialNotifier, DbMaterial?>(
-  EditingMaterialNotifier.new,
-);
+    .toList()
+  ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
 
 /// Add/update/delete operations for materials/expenses, exposed as a
 /// `Notifier<AsyncValue<void>>` so the UI can show progress and surface errors

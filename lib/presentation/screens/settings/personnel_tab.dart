@@ -100,6 +100,8 @@ class _PersonnelTabState extends ConsumerState<PersonnelTab> {
             TextField(
               controller: nameController,
               textCapitalization: TextCapitalization.words,
+              autocorrect: false,
+              enableSuggestions: false,
               decoration: const InputDecoration(labelText: 'Role Name'),
             ),
             const SizedBox(height: 16),
@@ -174,6 +176,8 @@ class _PersonnelTabState extends ConsumerState<PersonnelTab> {
                   child: TextField(
                     controller: _roleNameController,
                     textCapitalization: TextCapitalization.words,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: _dec('Role Name'),
                   ),
                 ),

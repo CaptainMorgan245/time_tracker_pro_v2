@@ -15,6 +15,10 @@ String _fmtDate(String iso) {
   return d == null ? '' : DateFormat('MMM d, yyyy').format(d);
 }
 
+/// The effective invoice view, derived from the filter (Active is the hub;
+/// Paid and Voided each offer a single button back to it).
+enum _InvoiceView { active, paid, voided }
+
 /// Invoices tab: grouped-by-project list with Active/Paid tabs and a Show Voided
 /// toggle. All filtering/grouping lives in [invoiceRowsProvider].
 class InvoicesScreen extends ConsumerWidget {
@@ -52,49 +56,7 @@ class InvoicesScreen extends ConsumerWidget {
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _navButton(
-                    context,
-                    label: 'Paid Invoice',
-                    icon: Icons.check_circle_outline,
-                    color: Colors.green.shade700,
-                    onPressed: () => notifier.setTab(InvoiceTab.paid),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _navButton(
-                    context,
-                    label: 'Estimates',
-                    icon: Icons.calculate_outlined,
-                    color: Colors.purple.shade700,
-                    onPressed: () => _snack(context, 'Estimates coming soon'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _navButton(
-                    context,
-                    label: 'Fixed Price Invoice',
-                    icon: Icons.add,
-                    color: Colors.blue.shade700,
-                    onPressed: () => _newFixedPriceInvoice(context, ref),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _navButton(
-                    context,
-                    label: 'Time & Materials Invoice',
-                    icon: Icons.checklist,
-                    color: Colors.orange.shade700,
-                    onPressed: () => _newTimeMaterialsInvoice(context, ref),
-                  ),
-                ),
-              ],
-            ),
+            child: _navRow(context, ref, filter, notifier),
           ),
           Expanded(
             child: AsyncValueView<List<InvoiceProjectGroup>>(
@@ -114,6 +76,79 @@ class InvoicesScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Context-sensitive top menu. Active is the hub (create + cross-nav);
+  /// Paid and Voided each reduce to a single "Invoices" button that resets to
+  /// Active (clearing both the tab and the Show Voided toggle).
+  Widget _navRow(
+    BuildContext context,
+    WidgetRef ref,
+    InvoiceListFilter filter,
+    InvoiceListFilterNotifier notifier,
+  ) {
+    final view = filter.showVoided
+        ? _InvoiceView.voided
+        : filter.tab == InvoiceTab.paid
+            ? _InvoiceView.paid
+            : _InvoiceView.active;
+
+    void toInvoices() {
+      notifier.setTab(InvoiceTab.active);
+      notifier.toggleVoided(false);
+    }
+
+    final buttons = <Widget>[
+      switch (view) {
+        _InvoiceView.active => _navButton(
+            context,
+            label: 'Paid Invoice',
+            icon: Icons.check_circle_outline,
+            color: Colors.green.shade700,
+            onPressed: () => notifier.setTab(InvoiceTab.paid),
+          ),
+        _InvoiceView.paid || _InvoiceView.voided => _navButton(
+            context,
+            label: 'Invoices',
+            icon: Icons.receipt_long,
+            color: Colors.blue.shade700,
+            onPressed: toInvoices,
+          ),
+      },
+      if (view == _InvoiceView.active || view == _InvoiceView.paid)
+        _navButton(
+          context,
+          label: 'Estimates',
+          icon: Icons.calculate_outlined,
+          color: Colors.purple.shade700,
+          onPressed: () => _snack(context, 'Estimates coming soon'),
+        ),
+      if (view == _InvoiceView.active) ...[
+        _navButton(
+          context,
+          label: 'Fixed Price Invoice',
+          icon: Icons.add,
+          color: Colors.blue.shade700,
+          onPressed: () => _newFixedPriceInvoice(context, ref),
+        ),
+        _navButton(
+          context,
+          label: 'Time & Materials Invoice',
+          icon: Icons.checklist,
+          color: Colors.orange.shade700,
+          onPressed: () => _newTimeMaterialsInvoice(context, ref),
+        ),
+      ],
+    ];
+
+    return Row(
+      children: [
+        for (var i = 0; i < buttons.length; i++) ...[
+          if (i > 0) const SizedBox(width: 8),
+          Expanded(child: buttons[i]),
+        ],
+      ],
     );
   }
 
@@ -220,11 +255,14 @@ class InvoicesScreen extends ConsumerWidget {
     }
 
     final clientName = {for (final c in clients) c.id: c.name};
+    // Both hourly (T&M) and fixed-price projects can carry Billable-coded work:
+    // fixed-price projects can be invoiced for above-contract "extras". The
+    // pricing-model restriction that used to block fixed-price here is gone now
+    // that `invoiceableEntriesProvider` filters to is_billable = 1 — so Contract
+    // Work is excluded and there's no double-billing exposure. Internal and
+    // completed projects still stay out.
     final selectable = projects
-        .where((p) =>
-            p.pricingModel == 'hourly' &&
-            p.isCompleted == 0 &&
-            p.isInternal == 0)
+        .where((p) => p.isCompleted == 0 && p.isInternal == 0)
         .toList()
       ..sort((a, b) => a.projectName.compareTo(b.projectName));
 

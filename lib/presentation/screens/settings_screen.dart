@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'settings/burden_rate_tab.dart';
 import 'settings/company_tax_tab.dart';
+import 'settings/cost_codes_tab.dart';
 import 'settings/expenses_tab.dart';
 import 'settings/general_tab.dart';
 import 'settings/help_tab.dart';
@@ -12,9 +13,14 @@ import 'settings/personnel_tab.dart';
 /// file under `settings/`, owning its own state and persistence.
 ///
 /// Tab order matches the original app:
-///   General & Reports · Personnel · Expenses · Email · Burden Rate · Company & Tax
+///   General & Reports · Personnel · Expenses · Cost Codes · Email · Burden Rate
+///   · Company & Tax
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.initialIndex = 0});
+
+  /// Tab to open on. 1 == Personnel (used by the timer's "no employees" empty
+  /// state to deep-link straight to employee creation).
+  final int initialIndex;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -27,7 +33,8 @@ class _SettingsScreenState extends State<SettingsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController =
+        TabController(length: 7, vsync: this, initialIndex: widget.initialIndex);
   }
 
   @override
@@ -50,6 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen>
             Tab(text: 'General & Reports'),
             Tab(text: 'Personnel'),
             Tab(text: 'Expenses'),
+            Tab(text: 'Cost Codes'),
             Tab(text: 'Email'),
             Tab(text: 'Burden Rate'),
             Tab(text: 'Company & Tax'),
@@ -62,6 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen>
           GeneralTab(),
           PersonnelTab(),
           ExpensesTab(),
+          CostCodesTab(),
           HelpTab(),
           BurdenRateTab(),
           CompanyTaxTab(),

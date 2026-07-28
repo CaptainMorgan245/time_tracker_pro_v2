@@ -7,6 +7,7 @@ import '../../providers/client_project_providers.dart';
 import '../../providers/cost_entry_providers.dart';
 import '../../widgets/async_value_view.dart';
 import 'cost_entry/cost_record_form.dart';
+import 'cost_entry/edit_expense_dialog.dart';
 
 /// Cost Entry tab (index 1): a compact inline form to log material/expense
 /// costs, above an editable, filterable list of expenses. The form's
@@ -65,7 +66,14 @@ class _CostEntryScreenState extends ConsumerState<CostEntryScreen> {
   @override
   Widget build(BuildContext context) {
     final projectsA = ref.watch(projectsStreamProvider);
-    final materialsA = ref.watch(materialsStreamProvider);
+    final amountQuery = ref.watch(costEntryAmountSearchProvider).trim();
+    final searching = amountQuery.isNotEmpty;
+    // When the amount lookup is active the records come from the DAO's ported v1
+    // searchMaterialsByAmount (all non-deleted expenses matched by amount),
+    // overriding the client/project filter; otherwise the normal stream.
+    final materialsA = searching
+        ? ref.watch(materialsByAmountProvider(amountQuery))
+        : ref.watch(materialsStreamProvider);
 
     return SafeArea(
       child: Column(
@@ -80,7 +88,7 @@ class _CostEntryScreenState extends ConsumerState<CostEntryScreen> {
             onProjectChanged: (id) => setState(() => _filterProjectId = id),
           ),
           const Divider(height: 1),
-          Expanded(child: _buildList(projectsA, materialsA)),
+          Expanded(child: _buildList(projectsA, materialsA, searching)),
         ],
       ),
     );
@@ -89,23 +97,34 @@ class _CostEntryScreenState extends ConsumerState<CostEntryScreen> {
   Widget _buildList(
     AsyncValue<List<DbProject>> projectsA,
     AsyncValue<List<DbMaterial>> materialsA,
+    bool searching,
   ) {
     return AsyncValueView<List<DbProject>>(
       value: projectsA,
       builder: (projects) => AsyncValueView<List<DbMaterial>>(
         value: materialsA,
-        builder: (materials) => _list(projects, materials),
+        builder: (materials) => _list(projects, materials, searching),
       ),
     );
   }
 
-  Widget _list(List<DbProject> projects, List<DbMaterial> materials) {
+  Widget _list(
+      List<DbProject> projects, List<DbMaterial> materials, bool searching) {
     final companyClientId = _companyClientId(projects);
-    final records = _filterMaterials(materials, projects, companyClientId);
+    // When searching, the DAO already returned amount-matched, non-deleted,
+    // newest-first rows — show them as-is; otherwise apply the client/project
+    // filter.
+    final records = searching
+        ? materials
+        : _filterMaterials(materials, projects, companyClientId);
     final projectName = {for (final p in projects) p.id: p.projectName};
 
     if (records.isEmpty) {
-      return const Center(child: Text('No expenses to show.'));
+      return Center(
+        child: Text(searching
+            ? 'No expenses match that amount.'
+            : 'No expenses to show.'),
+      );
     }
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(4, 4, 4, 80),
@@ -150,8 +169,7 @@ class _CostEntryScreenState extends ConsumerState<CostEntryScreen> {
                   padding: EdgeInsets.zero,
                   visualDensity: VisualDensity.compact,
                   constraints: const BoxConstraints(),
-                  onPressed: () =>
-                      ref.read(editingMaterialProvider.notifier).set(r),
+                  onPressed: () => showEditExpenseDialog(context, r),
                 ),
                 const SizedBox(width: 12),
                 IconButton(

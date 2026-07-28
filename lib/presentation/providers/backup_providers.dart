@@ -5,7 +5,15 @@ import 'package:intl/intl.dart';
 
 import '../../data/io/data_io_helper.dart';
 import '../../data/local/repositories/backup_repository.dart';
+import 'client_project_providers.dart';
+import 'cost_entry_providers.dart';
 import 'database_provider.dart';
+import 'invoice_providers.dart';
+import 'reference_data_providers.dart';
+import 'time_entry_providers.dart';
+// `timeEntriesStreamProvider` is also defined here (the timer lists' all-entries
+// stream); aliased so both same-named providers can be invalidated.
+import 'timer_providers.dart' as timer;
 
 /// Exposes the [BackupRepository], wired to the app database.
 final backupRepositoryProvider = Provider<BackupRepository>((ref) {
@@ -24,9 +32,34 @@ class ImportController extends AsyncNotifier<BackupImportResult?> {
 
   Future<void> importFromJson(String jsonString) async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
+    final res = await AsyncValue.guard(
       () => ref.read(backupRepositoryProvider).importFromJsonString(jsonString),
     );
+    if (!res.hasError) {
+      _invalidateAll();
+    }
+    state = res;
+  }
+
+  void _invalidateAll() {
+    // Import/clear rewrite every table via raw SQL (customStatement /
+    // customInsert), which does NOT notify Drift's stream queries. So each
+    // DB-backed stream must be invalidated by hand — otherwise dropdowns/lists
+    // (employees, cost codes, roles, …) keep showing stale, often EMPTY data
+    // until some later DAO write happens to refresh them.
+    ref.invalidate(clientsStreamProvider);
+    ref.invalidate(projectsStreamProvider);
+    ref.invalidate(employeesStreamProvider);
+    ref.invalidate(rolesStreamProvider);
+    ref.invalidate(costCodesStreamProvider);
+    ref.invalidate(timeEntriesStreamProvider);
+    ref.invalidate(timer.timeEntriesStreamProvider);
+    ref.invalidate(materialsStreamProvider);
+    ref.invalidate(expenseCategoriesStreamProvider);
+    ref.invalidate(appSettingsStreamProvider);
+    ref.invalidate(invoicesStreamProvider);
+    ref.invalidate(invoicePaymentsStreamProvider);
+    ref.invalidate(companySettingsStreamProvider);
   }
 }
 
@@ -84,9 +117,34 @@ class ClearDataController extends AsyncNotifier<void> {
 
   Future<void> clear() async {
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(
+    final res = await AsyncValue.guard(
       () => ref.read(backupRepositoryProvider).clearAllData(),
     );
+    if (!res.hasError) {
+      _invalidateAll();
+    }
+    state = res;
+  }
+
+  void _invalidateAll() {
+    // Import/clear rewrite every table via raw SQL (customStatement /
+    // customInsert), which does NOT notify Drift's stream queries. So each
+    // DB-backed stream must be invalidated by hand — otherwise dropdowns/lists
+    // (employees, cost codes, roles, …) keep showing stale, often EMPTY data
+    // until some later DAO write happens to refresh them.
+    ref.invalidate(clientsStreamProvider);
+    ref.invalidate(projectsStreamProvider);
+    ref.invalidate(employeesStreamProvider);
+    ref.invalidate(rolesStreamProvider);
+    ref.invalidate(costCodesStreamProvider);
+    ref.invalidate(timeEntriesStreamProvider);
+    ref.invalidate(timer.timeEntriesStreamProvider);
+    ref.invalidate(materialsStreamProvider);
+    ref.invalidate(expenseCategoriesStreamProvider);
+    ref.invalidate(appSettingsStreamProvider);
+    ref.invalidate(invoicesStreamProvider);
+    ref.invalidate(invoicePaymentsStreamProvider);
+    ref.invalidate(companySettingsStreamProvider);
   }
 }
 

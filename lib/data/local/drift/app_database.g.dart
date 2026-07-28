@@ -2933,8 +2933,19 @@ class $CostCodesTable extends CostCodes
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, isBillable];
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, isBillable, category];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2964,6 +2975,12 @@ class $CostCodesTable extends CostCodes
         isBillable.isAcceptableOrUnknown(data['is_billable']!, _isBillableMeta),
       );
     }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    }
     return context;
   }
 
@@ -2985,6 +3002,10 @@ class $CostCodesTable extends CostCodes
         DriftSqlType.int,
         data['${effectivePrefix}is_billable'],
       )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      ),
     );
   }
 
@@ -2997,11 +3018,27 @@ class $CostCodesTable extends CostCodes
 class DbCostCode extends DataClass implements Insertable<DbCostCode> {
   final int id;
   final String name;
+
+  /// Governs Time & Materials invoice line selection ONLY: 1 = selectable as an
+  /// individual T&M line item, 0 = not. Separate from [category] — see below.
   final int isBillable;
+
+  /// Semantic classification that drives how a code's entries roll up in the
+  /// analytics Project Financial Summary. One of `contract`, `billable`,
+  /// `no_charge`, `internal`; null when unassigned (treated as "needs review").
+  ///
+  /// Distinct from [isBillable] because the three non-billable categories —
+  /// `contract` (real cost covered by a fixed contract price), `no_charge`
+  /// (deliberate write-off), `internal` (overhead) — are all `is_billable = 0`
+  /// yet feed project financials completely differently, so a single flag can't
+  /// express them. Populated via the cost-code management screen; existing rows
+  /// stay null until set.
+  final String? category;
   const DbCostCode({
     required this.id,
     required this.name,
     required this.isBillable,
+    this.category,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3009,6 +3046,9 @@ class DbCostCode extends DataClass implements Insertable<DbCostCode> {
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['is_billable'] = Variable<int>(isBillable);
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
+    }
     return map;
   }
 
@@ -3017,6 +3057,9 @@ class DbCostCode extends DataClass implements Insertable<DbCostCode> {
       id: Value(id),
       name: Value(name),
       isBillable: Value(isBillable),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
     );
   }
 
@@ -3029,6 +3072,7 @@ class DbCostCode extends DataClass implements Insertable<DbCostCode> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       isBillable: serializer.fromJson<int>(json['isBillable']),
+      category: serializer.fromJson<String?>(json['category']),
     );
   }
   @override
@@ -3038,13 +3082,20 @@ class DbCostCode extends DataClass implements Insertable<DbCostCode> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'isBillable': serializer.toJson<int>(isBillable),
+      'category': serializer.toJson<String?>(category),
     };
   }
 
-  DbCostCode copyWith({int? id, String? name, int? isBillable}) => DbCostCode(
+  DbCostCode copyWith({
+    int? id,
+    String? name,
+    int? isBillable,
+    Value<String?> category = const Value.absent(),
+  }) => DbCostCode(
     id: id ?? this.id,
     name: name ?? this.name,
     isBillable: isBillable ?? this.isBillable,
+    category: category.present ? category.value : this.category,
   );
   DbCostCode copyWithCompanion(CostCodesCompanion data) {
     return DbCostCode(
@@ -3053,6 +3104,7 @@ class DbCostCode extends DataClass implements Insertable<DbCostCode> {
       isBillable: data.isBillable.present
           ? data.isBillable.value
           : this.isBillable,
+      category: data.category.present ? data.category.value : this.category,
     );
   }
 
@@ -3061,45 +3113,52 @@ class DbCostCode extends DataClass implements Insertable<DbCostCode> {
     return (StringBuffer('DbCostCode(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('isBillable: $isBillable')
+          ..write('isBillable: $isBillable, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, isBillable);
+  int get hashCode => Object.hash(id, name, isBillable, category);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DbCostCode &&
           other.id == this.id &&
           other.name == this.name &&
-          other.isBillable == this.isBillable);
+          other.isBillable == this.isBillable &&
+          other.category == this.category);
 }
 
 class CostCodesCompanion extends UpdateCompanion<DbCostCode> {
   final Value<int> id;
   final Value<String> name;
   final Value<int> isBillable;
+  final Value<String?> category;
   const CostCodesCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.isBillable = const Value.absent(),
+    this.category = const Value.absent(),
   });
   CostCodesCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     this.isBillable = const Value.absent(),
+    this.category = const Value.absent(),
   }) : name = Value(name);
   static Insertable<DbCostCode> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<int>? isBillable,
+    Expression<String>? category,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (isBillable != null) 'is_billable': isBillable,
+      if (category != null) 'category': category,
     });
   }
 
@@ -3107,11 +3166,13 @@ class CostCodesCompanion extends UpdateCompanion<DbCostCode> {
     Value<int>? id,
     Value<String>? name,
     Value<int>? isBillable,
+    Value<String?>? category,
   }) {
     return CostCodesCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       isBillable: isBillable ?? this.isBillable,
+      category: category ?? this.category,
     );
   }
 
@@ -3127,6 +3188,9 @@ class CostCodesCompanion extends UpdateCompanion<DbCostCode> {
     if (isBillable.present) {
       map['is_billable'] = Variable<int>(isBillable.value);
     }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
     return map;
   }
 
@@ -3135,7 +3199,8 @@ class CostCodesCompanion extends UpdateCompanion<DbCostCode> {
     return (StringBuffer('CostCodesCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('isBillable: $isBillable')
+          ..write('isBillable: $isBillable, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }
@@ -9367,6 +9432,20 @@ class $WorkerPaymentsTable extends WorkerPayments
       'REFERENCES employees (id)',
     ),
   );
+  static const VerificationMeta _projectIdMeta = const VerificationMeta(
+    'projectId',
+  );
+  @override
+  late final GeneratedColumn<int> projectId = GeneratedColumn<int>(
+    'project_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES projects (id)',
+    ),
+  );
   static const VerificationMeta _paymentDateMeta = const VerificationMeta(
     'paymentDate',
   );
@@ -9385,6 +9464,17 @@ class $WorkerPaymentsTable extends WorkerPayments
     aliasedName,
     false,
     type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _paymentTypeMeta = const VerificationMeta(
+    'paymentType',
+  );
+  @override
+  late final GeneratedColumn<String> paymentType = GeneratedColumn<String>(
+    'payment_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
@@ -9411,8 +9501,10 @@ class $WorkerPaymentsTable extends WorkerPayments
   List<GeneratedColumn> get $columns => [
     id,
     employeeId,
+    projectId,
     paymentDate,
     amount,
+    paymentType,
     note,
     createdAt,
   ];
@@ -9439,6 +9531,12 @@ class $WorkerPaymentsTable extends WorkerPayments
     } else if (isInserting) {
       context.missing(_employeeIdMeta);
     }
+    if (data.containsKey('project_id')) {
+      context.handle(
+        _projectIdMeta,
+        projectId.isAcceptableOrUnknown(data['project_id']!, _projectIdMeta),
+      );
+    }
     if (data.containsKey('payment_date')) {
       context.handle(
         _paymentDateMeta,
@@ -9457,6 +9555,17 @@ class $WorkerPaymentsTable extends WorkerPayments
       );
     } else if (isInserting) {
       context.missing(_amountMeta);
+    }
+    if (data.containsKey('payment_type')) {
+      context.handle(
+        _paymentTypeMeta,
+        paymentType.isAcceptableOrUnknown(
+          data['payment_type']!,
+          _paymentTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_paymentTypeMeta);
     }
     if (data.containsKey('note')) {
       context.handle(
@@ -9489,6 +9598,10 @@ class $WorkerPaymentsTable extends WorkerPayments
         DriftSqlType.int,
         data['${effectivePrefix}employee_id'],
       )!,
+      projectId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}project_id'],
+      ),
       paymentDate: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}payment_date'],
@@ -9496,6 +9609,10 @@ class $WorkerPaymentsTable extends WorkerPayments
       amount: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}amount'],
+      )!,
+      paymentType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payment_type'],
       )!,
       note: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
@@ -9517,15 +9634,29 @@ class $WorkerPaymentsTable extends WorkerPayments
 class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
   final int id;
   final int employeeId;
+
+  /// Project this payment is attributed to. Null for general (non-project)
+  /// payments. Required at the application layer when [paymentType] is
+  /// `'dividend'` — that rule is enforced in code, not in the schema.
+  final int? projectId;
   final String paymentDate;
+
+  /// Amount in integer **cents** (converted from dollars in the v4 cents
+  /// migration).
   final int amount;
+
+  /// Either `'wage'` or `'dividend'`. Non-nullable, and intentionally has no DB
+  /// default so every insert must state the type explicitly.
+  final String paymentType;
   final String? note;
   final String createdAt;
   const DbWorkerPayment({
     required this.id,
     required this.employeeId,
+    this.projectId,
     required this.paymentDate,
     required this.amount,
+    required this.paymentType,
     this.note,
     required this.createdAt,
   });
@@ -9534,8 +9665,12 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['employee_id'] = Variable<int>(employeeId);
+    if (!nullToAbsent || projectId != null) {
+      map['project_id'] = Variable<int>(projectId);
+    }
     map['payment_date'] = Variable<String>(paymentDate);
     map['amount'] = Variable<int>(amount);
+    map['payment_type'] = Variable<String>(paymentType);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
@@ -9547,8 +9682,12 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
     return WorkerPaymentsCompanion(
       id: Value(id),
       employeeId: Value(employeeId),
+      projectId: projectId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(projectId),
       paymentDate: Value(paymentDate),
       amount: Value(amount),
+      paymentType: Value(paymentType),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       createdAt: Value(createdAt),
     );
@@ -9562,8 +9701,10 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
     return DbWorkerPayment(
       id: serializer.fromJson<int>(json['id']),
       employeeId: serializer.fromJson<int>(json['employeeId']),
+      projectId: serializer.fromJson<int?>(json['projectId']),
       paymentDate: serializer.fromJson<String>(json['paymentDate']),
       amount: serializer.fromJson<int>(json['amount']),
+      paymentType: serializer.fromJson<String>(json['paymentType']),
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<String>(json['createdAt']),
     );
@@ -9574,8 +9715,10 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'employeeId': serializer.toJson<int>(employeeId),
+      'projectId': serializer.toJson<int?>(projectId),
       'paymentDate': serializer.toJson<String>(paymentDate),
       'amount': serializer.toJson<int>(amount),
+      'paymentType': serializer.toJson<String>(paymentType),
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<String>(createdAt),
     };
@@ -9584,15 +9727,19 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
   DbWorkerPayment copyWith({
     int? id,
     int? employeeId,
+    Value<int?> projectId = const Value.absent(),
     String? paymentDate,
     int? amount,
+    String? paymentType,
     Value<String?> note = const Value.absent(),
     String? createdAt,
   }) => DbWorkerPayment(
     id: id ?? this.id,
     employeeId: employeeId ?? this.employeeId,
+    projectId: projectId.present ? projectId.value : this.projectId,
     paymentDate: paymentDate ?? this.paymentDate,
     amount: amount ?? this.amount,
+    paymentType: paymentType ?? this.paymentType,
     note: note.present ? note.value : this.note,
     createdAt: createdAt ?? this.createdAt,
   );
@@ -9602,10 +9749,14 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
       employeeId: data.employeeId.present
           ? data.employeeId.value
           : this.employeeId,
+      projectId: data.projectId.present ? data.projectId.value : this.projectId,
       paymentDate: data.paymentDate.present
           ? data.paymentDate.value
           : this.paymentDate,
       amount: data.amount.present ? data.amount.value : this.amount,
+      paymentType: data.paymentType.present
+          ? data.paymentType.value
+          : this.paymentType,
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
@@ -9616,8 +9767,10 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
     return (StringBuffer('DbWorkerPayment(')
           ..write('id: $id, ')
           ..write('employeeId: $employeeId, ')
+          ..write('projectId: $projectId, ')
           ..write('paymentDate: $paymentDate, ')
           ..write('amount: $amount, ')
+          ..write('paymentType: $paymentType, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -9625,16 +9778,26 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, employeeId, paymentDate, amount, note, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    employeeId,
+    projectId,
+    paymentDate,
+    amount,
+    paymentType,
+    note,
+    createdAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DbWorkerPayment &&
           other.id == this.id &&
           other.employeeId == this.employeeId &&
+          other.projectId == this.projectId &&
           other.paymentDate == this.paymentDate &&
           other.amount == this.amount &&
+          other.paymentType == this.paymentType &&
           other.note == this.note &&
           other.createdAt == this.createdAt);
 }
@@ -9642,42 +9805,53 @@ class DbWorkerPayment extends DataClass implements Insertable<DbWorkerPayment> {
 class WorkerPaymentsCompanion extends UpdateCompanion<DbWorkerPayment> {
   final Value<int> id;
   final Value<int> employeeId;
+  final Value<int?> projectId;
   final Value<String> paymentDate;
   final Value<int> amount;
+  final Value<String> paymentType;
   final Value<String?> note;
   final Value<String> createdAt;
   const WorkerPaymentsCompanion({
     this.id = const Value.absent(),
     this.employeeId = const Value.absent(),
+    this.projectId = const Value.absent(),
     this.paymentDate = const Value.absent(),
     this.amount = const Value.absent(),
+    this.paymentType = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   WorkerPaymentsCompanion.insert({
     this.id = const Value.absent(),
     required int employeeId,
+    this.projectId = const Value.absent(),
     required String paymentDate,
     required int amount,
+    required String paymentType,
     this.note = const Value.absent(),
     required String createdAt,
   }) : employeeId = Value(employeeId),
        paymentDate = Value(paymentDate),
        amount = Value(amount),
+       paymentType = Value(paymentType),
        createdAt = Value(createdAt);
   static Insertable<DbWorkerPayment> custom({
     Expression<int>? id,
     Expression<int>? employeeId,
+    Expression<int>? projectId,
     Expression<String>? paymentDate,
     Expression<int>? amount,
+    Expression<String>? paymentType,
     Expression<String>? note,
     Expression<String>? createdAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (employeeId != null) 'employee_id': employeeId,
+      if (projectId != null) 'project_id': projectId,
       if (paymentDate != null) 'payment_date': paymentDate,
       if (amount != null) 'amount': amount,
+      if (paymentType != null) 'payment_type': paymentType,
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
     });
@@ -9686,16 +9860,20 @@ class WorkerPaymentsCompanion extends UpdateCompanion<DbWorkerPayment> {
   WorkerPaymentsCompanion copyWith({
     Value<int>? id,
     Value<int>? employeeId,
+    Value<int?>? projectId,
     Value<String>? paymentDate,
     Value<int>? amount,
+    Value<String>? paymentType,
     Value<String?>? note,
     Value<String>? createdAt,
   }) {
     return WorkerPaymentsCompanion(
       id: id ?? this.id,
       employeeId: employeeId ?? this.employeeId,
+      projectId: projectId ?? this.projectId,
       paymentDate: paymentDate ?? this.paymentDate,
       amount: amount ?? this.amount,
+      paymentType: paymentType ?? this.paymentType,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
     );
@@ -9710,11 +9888,17 @@ class WorkerPaymentsCompanion extends UpdateCompanion<DbWorkerPayment> {
     if (employeeId.present) {
       map['employee_id'] = Variable<int>(employeeId.value);
     }
+    if (projectId.present) {
+      map['project_id'] = Variable<int>(projectId.value);
+    }
     if (paymentDate.present) {
       map['payment_date'] = Variable<String>(paymentDate.value);
     }
     if (amount.present) {
       map['amount'] = Variable<int>(amount.value);
+    }
+    if (paymentType.present) {
+      map['payment_type'] = Variable<String>(paymentType.value);
     }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
@@ -9730,8 +9914,10 @@ class WorkerPaymentsCompanion extends UpdateCompanion<DbWorkerPayment> {
     return (StringBuffer('WorkerPaymentsCompanion(')
           ..write('id: $id, ')
           ..write('employeeId: $employeeId, ')
+          ..write('projectId: $projectId, ')
           ..write('paymentDate: $paymentDate, ')
           ..write('amount: $amount, ')
+          ..write('paymentType: $paymentType, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
@@ -10717,6 +10903,27 @@ final class $$ProjectsTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$WorkerPaymentsTable, List<DbWorkerPayment>>
+  _workerPaymentsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.workerPayments,
+    aliasName: $_aliasNameGenerator(
+      db.projects.id,
+      db.workerPayments.projectId,
+    ),
+  );
+
+  $$WorkerPaymentsTableProcessedTableManager get workerPaymentsRefs {
+    final manager = $$WorkerPaymentsTableTableManager(
+      $_db,
+      $_db.workerPayments,
+    ).filter((f) => f.projectId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_workerPaymentsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ProjectsTableFilterComposer
@@ -10910,6 +11117,31 @@ class $$ProjectsTableFilterComposer
           }) => $$MaterialsTableFilterComposer(
             $db: $db,
             $table: $db.materials,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> workerPaymentsRefs(
+    Expression<bool> Function($$WorkerPaymentsTableFilterComposer f) f,
+  ) {
+    final $$WorkerPaymentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.workerPayments,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WorkerPaymentsTableFilterComposer(
+            $db: $db,
+            $table: $db.workerPayments,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -11237,6 +11469,31 @@ class $$ProjectsTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> workerPaymentsRefs<T extends Object>(
+    Expression<T> Function($$WorkerPaymentsTableAnnotationComposer a) f,
+  ) {
+    final $$WorkerPaymentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.workerPayments,
+      getReferencedColumn: (t) => t.projectId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$WorkerPaymentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.workerPayments,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProjectsTableTableManager
@@ -11258,6 +11515,7 @@ class $$ProjectsTableTableManager
             bool invoicesRefs,
             bool timeEntriesRefs,
             bool materialsRefs,
+            bool workerPaymentsRefs,
           })
         > {
   $$ProjectsTableTableManager(_$AppDatabase db, $ProjectsTable table)
@@ -11358,6 +11616,7 @@ class $$ProjectsTableTableManager
                 invoicesRefs = false,
                 timeEntriesRefs = false,
                 materialsRefs = false,
+                workerPaymentsRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
@@ -11365,6 +11624,7 @@ class $$ProjectsTableTableManager
                     if (invoicesRefs) db.invoices,
                     if (timeEntriesRefs) db.timeEntries,
                     if (materialsRefs) db.materials,
+                    if (workerPaymentsRefs) db.workerPayments,
                   ],
                   addJoins:
                       <
@@ -11476,6 +11736,27 @@ class $$ProjectsTableTableManager
                               ),
                           typedResults: items,
                         ),
+                      if (workerPaymentsRefs)
+                        await $_getPrefetchedData<
+                          DbProject,
+                          $ProjectsTable,
+                          DbWorkerPayment
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProjectsTableReferences
+                              ._workerPaymentsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProjectsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).workerPaymentsRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.projectId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                     ];
                   },
                 );
@@ -11502,6 +11783,7 @@ typedef $$ProjectsTableProcessedTableManager =
         bool invoicesRefs,
         bool timeEntriesRefs,
         bool materialsRefs,
+        bool workerPaymentsRefs,
       })
     >;
 typedef $$RolesTableCreateCompanionBuilder =
@@ -12290,12 +12572,14 @@ typedef $$CostCodesTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       Value<int> isBillable,
+      Value<String?> category,
     });
 typedef $$CostCodesTableUpdateCompanionBuilder =
     CostCodesCompanion Function({
       Value<int> id,
       Value<String> name,
       Value<int> isBillable,
+      Value<String?> category,
     });
 
 final class $$CostCodesTableReferences
@@ -12360,6 +12644,11 @@ class $$CostCodesTableFilterComposer
 
   ColumnFilters<int> get isBillable => $composableBuilder(
     column: $table.isBillable,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12437,6 +12726,11 @@ class $$CostCodesTableOrderingComposer
     column: $table.isBillable,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CostCodesTableAnnotationComposer
@@ -12458,6 +12752,9 @@ class $$CostCodesTableAnnotationComposer
     column: $table.isBillable,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
 
   Expression<T> timeEntriesRefs<T extends Object>(
     Expression<T> Function($$TimeEntriesTableAnnotationComposer a) f,
@@ -12541,20 +12838,24 @@ class $$CostCodesTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<int> isBillable = const Value.absent(),
+                Value<String?> category = const Value.absent(),
               }) => CostCodesCompanion(
                 id: id,
                 name: name,
                 isBillable: isBillable,
+                category: category,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
                 Value<int> isBillable = const Value.absent(),
+                Value<String?> category = const Value.absent(),
               }) => CostCodesCompanion.insert(
                 id: id,
                 name: name,
                 isBillable: isBillable,
+                category: category,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -16802,8 +17103,10 @@ typedef $$WorkerPaymentsTableCreateCompanionBuilder =
     WorkerPaymentsCompanion Function({
       Value<int> id,
       required int employeeId,
+      Value<int?> projectId,
       required String paymentDate,
       required int amount,
+      required String paymentType,
       Value<String?> note,
       required String createdAt,
     });
@@ -16811,8 +17114,10 @@ typedef $$WorkerPaymentsTableUpdateCompanionBuilder =
     WorkerPaymentsCompanion Function({
       Value<int> id,
       Value<int> employeeId,
+      Value<int?> projectId,
       Value<String> paymentDate,
       Value<int> amount,
+      Value<String> paymentType,
       Value<String?> note,
       Value<String> createdAt,
     });
@@ -16844,6 +17149,25 @@ final class $$WorkerPaymentsTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static $ProjectsTable _projectIdTable(_$AppDatabase db) =>
+      db.projects.createAlias(
+        $_aliasNameGenerator(db.workerPayments.projectId, db.projects.id),
+      );
+
+  $$ProjectsTableProcessedTableManager? get projectId {
+    final $_column = $_itemColumn<int>('project_id');
+    if ($_column == null) return null;
+    final manager = $$ProjectsTableTableManager(
+      $_db,
+      $_db.projects,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_projectIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
 }
 
 class $$WorkerPaymentsTableFilterComposer
@@ -16867,6 +17191,11 @@ class $$WorkerPaymentsTableFilterComposer
 
   ColumnFilters<int> get amount => $composableBuilder(
     column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get paymentType => $composableBuilder(
+    column: $table.paymentType,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16902,6 +17231,29 @@ class $$WorkerPaymentsTableFilterComposer
     );
     return composer;
   }
+
+  $$ProjectsTableFilterComposer get projectId {
+    final $$ProjectsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableFilterComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$WorkerPaymentsTableOrderingComposer
@@ -16925,6 +17277,11 @@ class $$WorkerPaymentsTableOrderingComposer
 
   ColumnOrderings<int> get amount => $composableBuilder(
     column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get paymentType => $composableBuilder(
+    column: $table.paymentType,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -16960,6 +17317,29 @@ class $$WorkerPaymentsTableOrderingComposer
     );
     return composer;
   }
+
+  $$ProjectsTableOrderingComposer get projectId {
+    final $$ProjectsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableOrderingComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$WorkerPaymentsTableAnnotationComposer
@@ -16981,6 +17361,11 @@ class $$WorkerPaymentsTableAnnotationComposer
 
   GeneratedColumn<int> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get paymentType => $composableBuilder(
+    column: $table.paymentType,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
@@ -17010,6 +17395,29 @@ class $$WorkerPaymentsTableAnnotationComposer
     );
     return composer;
   }
+
+  $$ProjectsTableAnnotationComposer get projectId {
+    final $$ProjectsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.projectId,
+      referencedTable: $db.projects,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProjectsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.projects,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
 }
 
 class $$WorkerPaymentsTableTableManager
@@ -17025,7 +17433,7 @@ class $$WorkerPaymentsTableTableManager
           $$WorkerPaymentsTableUpdateCompanionBuilder,
           (DbWorkerPayment, $$WorkerPaymentsTableReferences),
           DbWorkerPayment,
-          PrefetchHooks Function({bool employeeId})
+          PrefetchHooks Function({bool employeeId, bool projectId})
         > {
   $$WorkerPaymentsTableTableManager(
     _$AppDatabase db,
@@ -17044,15 +17452,19 @@ class $$WorkerPaymentsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 Value<int> employeeId = const Value.absent(),
+                Value<int?> projectId = const Value.absent(),
                 Value<String> paymentDate = const Value.absent(),
                 Value<int> amount = const Value.absent(),
+                Value<String> paymentType = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<String> createdAt = const Value.absent(),
               }) => WorkerPaymentsCompanion(
                 id: id,
                 employeeId: employeeId,
+                projectId: projectId,
                 paymentDate: paymentDate,
                 amount: amount,
+                paymentType: paymentType,
                 note: note,
                 createdAt: createdAt,
               ),
@@ -17060,15 +17472,19 @@ class $$WorkerPaymentsTableTableManager
               ({
                 Value<int> id = const Value.absent(),
                 required int employeeId,
+                Value<int?> projectId = const Value.absent(),
                 required String paymentDate,
                 required int amount,
+                required String paymentType,
                 Value<String?> note = const Value.absent(),
                 required String createdAt,
               }) => WorkerPaymentsCompanion.insert(
                 id: id,
                 employeeId: employeeId,
+                projectId: projectId,
                 paymentDate: paymentDate,
                 amount: amount,
+                paymentType: paymentType,
                 note: note,
                 createdAt: createdAt,
               ),
@@ -17080,7 +17496,7 @@ class $$WorkerPaymentsTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({employeeId = false}) {
+          prefetchHooksCallback: ({employeeId = false, projectId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -17114,6 +17530,20 @@ class $$WorkerPaymentsTableTableManager
                               )
                               as T;
                     }
+                    if (projectId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.projectId,
+                                referencedTable: $$WorkerPaymentsTableReferences
+                                    ._projectIdTable(db),
+                                referencedColumn:
+                                    $$WorkerPaymentsTableReferences
+                                        ._projectIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
 
                     return state;
                   },
@@ -17138,7 +17568,7 @@ typedef $$WorkerPaymentsTableProcessedTableManager =
       $$WorkerPaymentsTableUpdateCompanionBuilder,
       (DbWorkerPayment, $$WorkerPaymentsTableReferences),
       DbWorkerPayment,
-      PrefetchHooks Function({bool employeeId})
+      PrefetchHooks Function({bool employeeId, bool projectId})
     >;
 
 class $AppDatabaseManager {

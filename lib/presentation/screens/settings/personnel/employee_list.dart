@@ -51,6 +51,8 @@ class _EmployeeListState extends ConsumerState<EmployeeList> {
             TextField(
               controller: nameController,
               textCapitalization: TextCapitalization.words,
+              autocorrect: false,
+              enableSuggestions: false,
               decoration: const InputDecoration(labelText: 'Employee Name'),
             ),
             const SizedBox(height: 16),

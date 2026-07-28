@@ -170,12 +170,16 @@ class _CompanyTaxTabState extends ConsumerState<CompanyTaxTab> {
                   TextField(
                     controller: companyNameController,
                     textCapitalization: TextCapitalization.words,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: _dec('Company Name'),
                   ),
                   gap,
                   TextField(
                     controller: companyAddressController,
                     textCapitalization: TextCapitalization.words,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: _dec('Street Address'),
                   ),
                   gap,
@@ -186,6 +190,8 @@ class _CompanyTaxTabState extends ConsumerState<CompanyTaxTab> {
                         child: TextField(
                           controller: companyCityController,
                           textCapitalization: TextCapitalization.words,
+                          autocorrect: false,
+                          enableSuggestions: false,
                           decoration: _dec('City'),
                         ),
                       ),
@@ -209,6 +215,8 @@ class _CompanyTaxTabState extends ConsumerState<CompanyTaxTab> {
                   TextField(
                     controller: countryController,
                     textCapitalization: TextCapitalization.words,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: _dec('Country'),
                   ),
                   gap,
@@ -243,6 +251,8 @@ class _CompanyTaxTabState extends ConsumerState<CompanyTaxTab> {
                   TextField(
                     controller: regionLabelController,
                     textCapitalization: TextCapitalization.words,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: _dec('Province/State Field Label',
                         hint: 'e.g. Province, State, County'),
                   ),
@@ -250,6 +260,8 @@ class _CompanyTaxTabState extends ConsumerState<CompanyTaxTab> {
                   TextField(
                     controller: postalCodeLabelController,
                     textCapitalization: TextCapitalization.words,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: _dec('Postal/ZIP Field Label',
                         hint: 'e.g. Postal Code, ZIP Code, Postcode'),
                   ),
@@ -341,6 +353,8 @@ class _CompanyTaxTabState extends ConsumerState<CompanyTaxTab> {
               child: TextField(
                 controller: termsController,
                 textCapitalization: TextCapitalization.sentences,
+                autocorrect: false,
+                enableSuggestions: false,
                 maxLines: 2,
                 decoration:
                     _dec('Default Terms', hint: 'Payable on Receipt'),

@@ -11,9 +11,17 @@ class ProjectsDao extends DatabaseAccessor<AppDatabase>
     with _$ProjectsDaoMixin {
   ProjectsDao(super.db);
 
-  Future<List<DbProject>> getAll() => select(projects).get();
+  /// Ordered by project name, case-insensitively — see [_byName].
+  Future<List<DbProject>> getAll() => _byName().get();
 
-  Stream<List<DbProject>> watchAll() => select(projects).watch();
+  Stream<List<DbProject>> watchAll() => _byName().watch();
+
+  /// `SELECT … ORDER BY project_name COLLATE NOCASE`, so every project picker
+  /// and list is alphabetical without each screen sorting for itself.
+  SimpleSelectStatement<$ProjectsTable, DbProject> _byName() => select(projects)
+    ..orderBy([
+      (t) => OrderingTerm(expression: t.projectName.collate(Collate.noCase))
+    ]);
 
   Future<DbProject?> getById(int id) =>
       (select(projects)..where((t) => t.id.equals(id))).getSingleOrNull();

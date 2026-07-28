@@ -151,7 +151,11 @@ class DataManagementScreen extends ConsumerWidget {
             TextField(
               controller: controller,
               autofocus: true,
-              textCapitalization: TextCapitalization.words,
+              // A filename, not prose — leave it exactly as typed, so no case
+              // hint and no autocorrect rewriting an underscore_separated name.
+              textCapitalization: TextCapitalization.none,
+              autocorrect: false,
+              enableSuggestions: false,
               decoration: const InputDecoration(
                 hintText: 'e.g., Before_Tax_Season',
                 border: OutlineInputBorder(),

@@ -11,10 +11,17 @@ class ExpenseCategoriesDao extends DatabaseAccessor<AppDatabase>
     with _$ExpenseCategoriesDaoMixin {
   ExpenseCategoriesDao(super.db);
 
-  Future<List<DbExpenseCategory>> getAll() => select(expenseCategories).get();
+  /// Ordered by name, case-insensitively — see [_byName].
+  Future<List<DbExpenseCategory>> getAll() => _byName().get();
 
-  Stream<List<DbExpenseCategory>> watchAll() =>
-      select(expenseCategories).watch();
+  Stream<List<DbExpenseCategory>> watchAll() => _byName().watch();
+
+  /// `SELECT … ORDER BY name COLLATE NOCASE`, so every category picker and list
+  /// is alphabetical without each screen sorting for itself.
+  SimpleSelectStatement<$ExpenseCategoriesTable, DbExpenseCategory> _byName() =>
+      select(expenseCategories)
+        ..orderBy(
+            [(t) => OrderingTerm(expression: t.name.collate(Collate.noCase))]);
 
   Future<DbExpenseCategory?> getById(int id) =>
       (select(expenseCategories)..where((t) => t.id.equals(id)))

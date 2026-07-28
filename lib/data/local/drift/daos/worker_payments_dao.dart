@@ -23,6 +23,12 @@ class WorkerPaymentsDao extends DatabaseAccessor<AppDatabase>
       (select(workerPayments)..where((t) => t.employeeId.equals(employeeId)))
           .get();
 
+  /// Payments attributed to a specific project (e.g. dividend payouts). Excludes
+  /// general payments where `projectId` is null.
+  Future<List<DbWorkerPayment>> getByProject(int projectId) =>
+      (select(workerPayments)..where((t) => t.projectId.equals(projectId)))
+          .get();
+
   Future<int> insertRow(WorkerPaymentsCompanion entry) =>
       into(workerPayments).insert(entry);
 

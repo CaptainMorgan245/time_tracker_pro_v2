@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers/cost_entry_providers.dart';
 import '../../widgets/app_bottom_nav_bar.dart';
 import '../clients_projects/clients_projects_screen.dart';
 import '../data_management_screen.dart';
 import '../database_viewer_screen.dart';
+import '../payroll_screen.dart';
 import '../settings_screen.dart';
 import 'analytics_screen.dart';
 import 'cost_entry_screen.dart';
@@ -16,17 +19,22 @@ import 'time_entry_screen.dart';
 /// and a fixed bottom navigation bar to switch between them.
 ///
 /// The four areas are placeholders for now (see the `dashboard/` screens).
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key, this.initialIndex = 0});
 
   final int initialIndex;
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   late int _selectedIndex = widget.initialIndex;
+
+  /// Amount-lookup state for the Cost Entry tab (index 1). The query text is
+  /// mirrored into [costEntryAmountSearchProvider] for the screen to read.
+  bool _isSearching = false;
+  final TextEditingController _amountSearch = TextEditingController();
 
   static const _titles = ['Dashboard', 'Cost Entry', 'Analytics', 'Invoices'];
 
@@ -37,7 +45,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     InvoicesScreen(),
   ];
 
-  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
+  void _onItemTapped(int index) {
+    // Leaving the Cost Entry tab cancels any active amount lookup.
+    if (index != 1 && (_isSearching || _amountSearch.text.isNotEmpty)) {
+      _amountSearch.clear();
+      ref.read(costEntryAmountSearchProvider.notifier).clear();
+      _isSearching = false;
+    }
+    setState(() => _selectedIndex = index);
+  }
+
+  @override
+  void dispose() {
+    _amountSearch.dispose();
+    super.dispose();
+  }
 
   void _open(Widget screen) {
     Navigator.pop(context); // close the drawer
@@ -47,7 +69,53 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_titles[_selectedIndex])),
+      appBar: AppBar(
+        // Cost Entry tab gets an amount-lookup search (ported from v1): a $
+        // search toggle that swaps the title for a numeric field; its text drives
+        // the records list via costEntryAmountSearchProvider.
+        title: _selectedIndex == 1 && _isSearching
+            ? TextField(
+                controller: _amountSearch,
+                autofocus: true,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  hintText: 'Enter amount…',
+                  hintStyle: TextStyle(color: Colors.white70),
+                  border: InputBorder.none,
+                ),
+                onChanged: (v) =>
+                    ref.read(costEntryAmountSearchProvider.notifier).set(v),
+              )
+            : Text(_titles[_selectedIndex]),
+        actions: _selectedIndex == 1
+            ? [
+                IconButton(
+                  tooltip: _isSearching
+                      ? 'Close amount search'
+                      : 'Search by amount',
+                  icon: _isSearching
+                      ? const Icon(Icons.close)
+                      : const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [Icon(Icons.search), Text('\$')],
+                        ),
+                  onPressed: () {
+                    setState(() {
+                      _isSearching = !_isSearching;
+                      if (!_isSearching) {
+                        _amountSearch.clear();
+                        ref
+                            .read(costEntryAmountSearchProvider.notifier)
+                            .clear();
+                      }
+                    });
+                  },
+                ),
+              ]
+            : null,
+      ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -79,12 +147,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ListTile(
               leading: const Icon(Icons.work_outline),
               title: const Text('Clients & Projects'),
+              trailing: IconButton(
+                icon: const Icon(Icons.help_outline),
+                tooltip: 'About clients & projects',
+                onPressed: () => showDialog<void>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Clients & Projects'),
+                    content: const Text(
+                      'A project needs a client. A client can have multiple '
+                      'projects.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('Got it'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               onTap: () => _open(const ClientsProjectsScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.access_time),
               title: const Text('Time Entry Form'),
               onTap: () => _open(const TimeEntryScreen()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.schedule),
+              title: const Text('Project Disbursements'),
+              onTap: () => _open(const PayrollScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.settings_outlined),

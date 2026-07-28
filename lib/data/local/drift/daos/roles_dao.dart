@@ -10,9 +10,15 @@ part 'roles_dao.g.dart';
 class RolesDao extends DatabaseAccessor<AppDatabase> with _$RolesDaoMixin {
   RolesDao(super.db);
 
-  Future<List<DbRole>> getAll() => select(roles).get();
+  /// Ordered by name, case-insensitively — see [_byName].
+  Future<List<DbRole>> getAll() => _byName().get();
 
-  Stream<List<DbRole>> watchAll() => select(roles).watch();
+  Stream<List<DbRole>> watchAll() => _byName().watch();
+
+  /// `SELECT … ORDER BY name COLLATE NOCASE`, so every role picker and list is
+  /// alphabetical without each screen sorting for itself.
+  SimpleSelectStatement<$RolesTable, DbRole> _byName() => select(roles)
+    ..orderBy([(t) => OrderingTerm(expression: t.name.collate(Collate.noCase))]);
 
   Future<DbRole?> getById(int id) =>
       (select(roles)..where((t) => t.id.equals(id))).getSingleOrNull();

@@ -29,9 +29,10 @@ class TimeEntriesDao extends DatabaseAccessor<AppDatabase>
   Future<List<DbTimeEntry>> getByProject(int projectId) =>
       (select(timeEntries)..where((t) => t.projectId.equals(projectId))).get();
 
-  /// Unbilled, completed, non-deleted entries for [projectId] — the candidates
-  /// for a new invoice. Filters `isBilled = 0 AND isDeleted = 0 AND end_time IS
-  /// NOT NULL`, newest first.
+  /// Unbilled, completed, non-deleted entries for [projectId]. Filters
+  /// `isBilled = 0 AND isDeleted = 0 AND end_time IS NOT NULL`, newest first.
+  /// Raw feed only — the T&M `is_billable` eligibility rule is applied above
+  /// this, in `invoiceableEntriesProvider`.
   Stream<List<DbTimeEntry>> watchUnbilledByProject(int projectId) =>
       (select(timeEntries)
             ..where((t) =>
@@ -78,4 +79,10 @@ class TimeEntriesDao extends DatabaseAccessor<AppDatabase>
         isBilled: Value(0),
         invoiceId: Value(null),
       ));
+
+  /// All time entries linked to [invoiceId], as a stream — the "already on this
+  /// invoice" set for the invoice-edit picker. Includes soft-deleted rows so a
+  /// caller can detect a billed entry that was deleted after invoicing.
+  Stream<List<DbTimeEntry>> watchByInvoice(int invoiceId) =>
+      (select(timeEntries)..where((t) => t.invoiceId.equals(invoiceId))).watch();
 }

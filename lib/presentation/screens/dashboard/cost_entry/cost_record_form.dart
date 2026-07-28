@@ -6,18 +6,18 @@ import 'package:intl/intl.dart';
 import '../../../../data/local/drift/app_database.dart';
 import '../../../providers/client_project_providers.dart';
 import '../../../providers/cost_entry_providers.dart';
-import '../../../providers/database_provider.dart';
 import '../../../providers/reference_data_providers.dart'
     show costCodesStreamProvider;
 import '../../../widgets/async_value_view.dart';
 
-/// Compact inline add/edit form for an expense, ported from the original app's
+/// Compact inline add form for an expense, ported from the original app's
 /// CostRecordFormTopRow + CostRecordForm. Deliberately dense: small outlined
 /// boxes packed across rows so the list below keeps its space.
 ///
 /// Client/Project are owned by the screen (they also filter the list) and
-/// passed in. When the list's Edit icon sets [editingMaterialProvider], the
-/// form populates and syncs the Client/Project filter to that record.
+/// passed in. Editing an existing expense is handled separately by the isolated
+/// [showEditExpenseDialog], which keeps its own form state and never touches
+/// this form or the screen's Client/Project filter.
 class CostRecordForm extends ConsumerStatefulWidget {
   const CostRecordForm({
     super.key,
@@ -42,7 +42,6 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
   final _quantityController = TextEditingController();
   final _odometerController = TextEditingController();
 
-  int? _editingId;
   DateTime _purchaseDate = DateTime.now();
   String? _category;
   String? _vendor;
@@ -51,7 +50,6 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
   bool _isCompanyExpense = false;
   bool _isReturn = false;
 
-  bool get _isEditing => _editingId != null;
   bool get _isFuel => _category == 'Fuel';
 
   @override
@@ -84,43 +82,12 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
     return null;
   }
 
-  void _populateFrom(DbMaterial e) {
-    final projects =
-        ref.read(projectsStreamProvider).asData?.value ?? const <DbProject>[];
-    int? clientId;
-    for (final p in projects) {
-      if (p.id == e.projectId) {
-        clientId = p.clientId;
-        break;
-      }
-    }
-    setState(() {
-      _editingId = e.id;
-      _itemNameController.text = e.itemName;
-      _costController.text = (e.cost.abs() / 100).toStringAsFixed(2);
-      _quantityController.text = e.quantity?.toStringAsFixed(2) ?? '';
-      _odometerController.text = e.odometerReading?.toStringAsFixed(0) ?? '';
-      _purchaseDate = e.purchaseDate != null
-          ? DateTime.parse(e.purchaseDate!)
-          : DateTime.now();
-      _category = e.expenseCategory;
-      _vendor = e.vendorOrSubtrade;
-      _vehicleDesignation = e.vehicleDesignation;
-      _costCodeId = e.costCodeId;
-      _isCompanyExpense = e.isCompanyExpense != 0;
-      _isReturn = e.cost < 0;
-    });
-    widget.onClientChanged(clientId);
-    widget.onProjectChanged(e.projectId);
-  }
-
   void _reset() {
     _itemNameController.clear();
     _costController.clear();
     _quantityController.clear();
     _odometerController.clear();
     setState(() {
-      _editingId = null;
       _purchaseDate = DateTime.now();
       _category = null;
       _vendor = null;
@@ -129,11 +96,6 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
       _isCompanyExpense = false;
       _isReturn = false;
     });
-  }
-
-  void _clear() {
-    ref.read(editingMaterialProvider.notifier).set(null);
-    _reset();
   }
 
   void _snack(String msg) =>
@@ -179,76 +141,34 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
         _isCompanyExpense ? double.tryParse(_odometerController.text) : null;
 
     final actions = ref.read(costEntryActionsProvider.notifier);
-    if (_isEditing) {
-      final existing =
-          await ref.read(databaseProvider).materialsDao.getById(_editingId!);
-      if (existing == null) {
-        _clear();
-        return;
-      }
-      await actions.update(
-        existing.toCompanion(false).copyWith(
-              projectId: Value(projectId),
-              itemName: Value(itemName),
-              cost: Value(signed),
-              purchaseDate: Value(_purchaseDate.toIso8601String()),
-              expenseCategory: Value(_category),
-              isCompanyExpense: Value(_isCompanyExpense ? 1 : 0),
-              vehicleDesignation:
-                  Value(_isCompanyExpense ? _vehicleDesignation : null),
-              vendorOrSubtrade: Value(_vendor),
-              costCodeId: Value(_costCodeId),
-              unit: Value(_isFuel ? 'Liters' : null),
-              quantity: Value(qty),
-              odometerReading: Value(odo),
-            ),
-      );
-      if (!mounted) return;
-      final s = ref.read(costEntryActionsProvider);
-      if (s.hasError) {
-        _snack('Failed to save expense: ${s.error}');
-        return;
-      }
-      ref.read(editingMaterialProvider.notifier).set(null);
-      _reset();
-    } else {
-      await actions.add(
-        MaterialsCompanion.insert(
-          projectId: projectId,
-          itemName: itemName,
-          cost: signed,
-          purchaseDate: Value(_purchaseDate.toIso8601String()),
-          expenseCategory: Value(_category),
-          isCompanyExpense: Value(_isCompanyExpense ? 1 : 0),
-          vehicleDesignation:
-              Value(_isCompanyExpense ? _vehicleDesignation : null),
-          vendorOrSubtrade: Value(_vendor),
-          costCodeId: Value(_costCodeId),
-          unit: Value(_isFuel ? 'Liters' : null),
-          quantity: Value(qty),
-          odometerReading: Value(odo),
-        ),
-      );
-      if (!mounted) return;
-      final s = ref.read(costEntryActionsProvider);
-      if (s.hasError) {
-        _snack('Failed to save expense: ${s.error}');
-        return;
-      }
-      _reset();
+    await actions.add(
+      MaterialsCompanion.insert(
+        projectId: projectId,
+        itemName: itemName,
+        cost: signed,
+        purchaseDate: Value(_purchaseDate.toIso8601String()),
+        expenseCategory: Value(_category),
+        isCompanyExpense: Value(_isCompanyExpense ? 1 : 0),
+        vehicleDesignation:
+            Value(_isCompanyExpense ? _vehicleDesignation : null),
+        vendorOrSubtrade: Value(_vendor),
+        costCodeId: Value(_costCodeId),
+        unit: Value(_isFuel ? 'Liters' : null),
+        quantity: Value(qty),
+        odometerReading: Value(odo),
+      ),
+    );
+    if (!mounted) return;
+    final s = ref.read(costEntryActionsProvider);
+    if (s.hasError) {
+      _snack('Failed to save expense: ${s.error}');
+      return;
     }
+    _reset();
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<DbMaterial?>(editingMaterialProvider, (prev, next) {
-      if (next != null && next.id != _editingId) {
-        _populateFrom(next);
-      } else if (next == null && _editingId != null) {
-        _reset();
-      }
-    });
-
     final projectsA = ref.watch(projectsStreamProvider);
     final clientsA = ref.watch(clientsStreamProvider);
     final categoriesA = ref.watch(expenseCategoriesStreamProvider);
@@ -374,6 +294,8 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
                     controller: _itemNameController,
                     style: _fieldStyle,
                     textCapitalization: TextCapitalization.words,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: _dec('Item Name'),
                   ),
                 ),
@@ -554,10 +476,10 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
                 Expanded(
                   flex: 1,
                   child: OutlinedButton(
-                    onPressed: busy ? null : _clear,
+                    onPressed: busy ? null : _reset,
                     style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10)),
-                    child: Text(_isEditing ? 'Cancel' : 'Clear'),
+                    child: const Text('Clear'),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -567,7 +489,7 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
                     onPressed: busy ? null : () => _submit(projects),
                     style: FilledButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 10)),
-                    child: Text(_isEditing ? 'Update Expense' : 'Add Expense'),
+                    child: const Text('Add Expense'),
                   ),
                 ),
               ],

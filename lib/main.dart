@@ -4,7 +4,7 @@ import 'presentation/screens/dashboard/dashboard_screen.dart';
 
 void main() {
   // ProviderScope stores the state of all Riverpod providers. It must wrap the
-  // entire app so any widget below can read/watch providers.
+  // entire app so any widget belowflutter ana can read/watch providers.
   runApp(const ProviderScope(child: TimeTrackerProApp()));
 }
 

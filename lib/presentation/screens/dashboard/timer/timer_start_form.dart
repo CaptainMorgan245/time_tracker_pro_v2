@@ -8,6 +8,9 @@ import '../../../providers/database_provider.dart';
 import '../../../providers/reference_data_providers.dart';
 import '../../../providers/timer_providers.dart';
 import '../../../widgets/async_value_view.dart';
+import '../../clients_projects/clients_projects_screen.dart';
+import '../../settings_screen.dart';
+import '../onboarding/cost_code_quick_create_dialog.dart';
 
 /// Card with the "start a timer" form, ported from the old app's TimerAddForm
 /// (live-timer mode). Pick a project and employee (both required), optionally a
@@ -105,6 +108,51 @@ class _TimerStartFormState extends ConsumerState<TimerStartForm> {
   void _snack(String msg) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  // ---- Empty-state ghost fields (shown when a dropdown has no options) ------
+
+  Future<void> _goCreateProject() => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const ClientsProjectsScreen()),
+      );
+
+  Future<void> _goCreateEmployee() => Navigator.of(context).push(
+        MaterialPageRoute(
+            builder: (_) => const SettingsScreen(initialIndex: 1)),
+      );
+
+  Future<void> _quickCreateCostCode() async {
+    final id = await showCostCodeQuickCreateDialog(context, ref);
+    if (id != null && mounted) setState(() => _costCodeId = id);
+  }
+
+  /// A tappable placeholder that mimics a dropdown, nudging a brand-new user to
+  /// create the missing data instead of facing a blank, unusable field.
+  Widget _ghostField(String label, String message, VoidCallback onTap) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                message,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    color: theme.hintColor, fontStyle: FontStyle.italic),
+              ),
+            ),
+            Icon(Icons.add, size: 18, color: theme.colorScheme.primary),
+          ],
+        ),
+      ),
+    );
   }
 
   String? get _details =>
@@ -293,64 +341,78 @@ class _TimerStartFormState extends ConsumerState<TimerStartForm> {
             Row(
               children: [
                 Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: projectValue,
-                    isExpanded: true,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      labelText: 'Project',
-                    ),
-                    items: projects
-                        .map((p) => DropdownMenuItem(
-                              value: p.id,
-                              child: Text(p.projectName,
-                                  overflow: TextOverflow.ellipsis),
-                            ))
-                        .toList(),
-                    onChanged: (id) => setState(() => _projectId = id),
-                  ),
+                  child: projects.isEmpty
+                      ? _ghostField('Project',
+                          'No projects yet – tap to create', _goCreateProject)
+                      : DropdownButtonFormField<int>(
+                          initialValue: projectValue,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                            labelText: 'Project',
+                          ),
+                          items: projects
+                              .map((p) => DropdownMenuItem(
+                                    value: p.id,
+                                    child: Text(p.projectName,
+                                        overflow: TextOverflow.ellipsis),
+                                  ))
+                              .toList(),
+                          onChanged: (id) => setState(() => _projectId = id),
+                        ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: employeeValue,
-                    isExpanded: true,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      labelText: 'Employee',
-                    ),
-                    items: employees
-                        .map((e) => DropdownMenuItem(
-                              value: e.id,
-                              child:
-                                  Text(e.name, overflow: TextOverflow.ellipsis),
-                            ))
-                        .toList(),
-                    onChanged: (id) => setState(() => _employeeId = id),
-                  ),
+                  child: employees.isEmpty
+                      ? _ghostField('Employee',
+                          'No employees yet – tap to create', _goCreateEmployee)
+                      : DropdownButtonFormField<int>(
+                          initialValue: employeeValue,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                            labelText: 'Employee',
+                          ),
+                          items: employees
+                              .map((e) => DropdownMenuItem(
+                                    value: e.id,
+                                    child: Text(e.name,
+                                        overflow: TextOverflow.ellipsis),
+                                  ))
+                              .toList(),
+                          onChanged: (id) => setState(() => _employeeId = id),
+                        ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: DropdownButtonFormField<int>(
-                    initialValue: costCodeValue,
-                    isExpanded: true,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      labelText: 'Cost Code',
-                    ),
-                    items: [
-                      const DropdownMenuItem<int>(
-                          value: null, child: Text('None')),
-                      ...costCodes.map((c) => DropdownMenuItem(
-                            value: c.id,
-                            child: Text(c.name, overflow: TextOverflow.ellipsis),
-                          )),
-                    ],
-                    onChanged: (id) => setState(() => _costCodeId = id),
-                  ),
+                  child: costCodes.isEmpty
+                      ? _ghostField('Cost Code',
+                          'No cost codes yet – tap to create',
+                          _quickCreateCostCode)
+                      : DropdownButtonFormField<int>(
+                          initialValue: costCodeValue,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                            labelText: 'Cost Code',
+                          ),
+                          items: [
+                            const DropdownMenuItem<int>(
+                                value: null, child: Text('None')),
+                            ...costCodes.map((c) => DropdownMenuItem(
+                                  value: c.id,
+                                  child: Text(c.name,
+                                      overflow: TextOverflow.ellipsis),
+                                )),
+                          ],
+                          onChanged: (id) => setState(() => _costCodeId = id),
+                        ),
                 ),
               ],
             ),
@@ -358,6 +420,8 @@ class _TimerStartFormState extends ConsumerState<TimerStartForm> {
             TextField(
               controller: _detailsController,
               textCapitalization: TextCapitalization.sentences,
+              autocorrect: false,
+              enableSuggestions: false,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -376,7 +440,8 @@ class _TimerStartFormState extends ConsumerState<TimerStartForm> {
                         flex: 1,
                         child: ElevatedButton(
                           onPressed: busy ? null : _clear,
-                          child: const Text('Clear', style: TextStyle(fontSize: 12)),
+                          child: const Text('Clear',
+                              style: TextStyle(fontSize: 12)),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -386,8 +451,8 @@ class _TimerStartFormState extends ConsumerState<TimerStartForm> {
                           onPressed: (editing || busy)
                               ? null
                               : () => _setTimeAndStart(employees),
-                          child:
-                              const Text('Set Time', style: TextStyle(fontSize: 12)),
+                          child: const Text('Set Time',
+                              style: TextStyle(fontSize: 12)),
                         ),
                       ),
                     ],
