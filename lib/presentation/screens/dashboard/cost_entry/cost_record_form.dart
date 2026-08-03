@@ -82,6 +82,16 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
     return null;
   }
 
+  /// Clears the form completely — including the Client/Project selection, which
+  /// this widget does NOT own: the parent holds it (there it doubles as the
+  /// records-list filter), so it can only be cleared through
+  /// [CostRecordForm.onClientChanged].
+  ///
+  /// Matches v1, where the Clear button and a successful add both ran the same
+  /// `_handleClearOrCancel`, nulling client and project every time. The v2 port
+  /// reset only the locally-owned fields, which left the project still selected
+  /// after each addition — so the next expense silently defaulted to the previous
+  /// one's project.
   void _reset() {
     _itemNameController.clear();
     _costController.clear();
@@ -96,6 +106,9 @@ class _CostRecordFormState extends ConsumerState<CostRecordForm> {
       _isCompanyExpense = false;
       _isReturn = false;
     });
+    // Clearing the client clears the project with it — see the parent's
+    // onClientChanged, which nulls both.
+    widget.onClientChanged(null);
   }
 
   void _snack(String msg) =>

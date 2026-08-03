@@ -1,0 +1,108 @@
+{
+  "fixture": "invoice_payment_status",
+  "purpose": "Exercises the refactored paid-cents / invoice-status logic in invoice_providers.dart. After extracting paidCentsByInvoiceProvider, the 'sum non-void payments' rule lives in one place (paidCentsByInvoice) and feeds invoiceStatusOf, invoiceRowsProvider (list tabs + grouping), and invoiceDetailProvider (paidCents/balanceDue). This fixture asserts identical behaviour across all of those.",
+
+  "rules_under_test": {
+    "paid_cents": "amount paid per invoice = SUM(amount) over its payments WHERE isVoid = 0. Voided payments are kept but excluded.",
+    "fully_paid": "isInvoiceFullyPaid == (totalAmount > 0 && paidCents >= totalAmount - 1). Note the 1-cent tolerance and the totalAmount>0 guard.",
+    "status_ladder": "voided if isDeleted != 0; else paid if fully paid; else partial if paidCents > 0; else sent if isSent != 0; else draft.",
+    "money_unit": "all *Amount / amount fields are integer CENTS. balanceDue is reported in DOLLARS = (totalAmount - paidCents) / 100.",
+    "list_tabs": "active tab = isDeleted==0 && !fullyPaid; paid tab = isDeleted==0 && fullyPaid; voided view (showVoided=true) = isDeleted != 0.",
+    "grouping": "list rows are grouped by project name (sorted asc); group total (dollars) = SUM(totalAmount)/100 over its rows; rows within a group sorted by invoiceDate DESC.",
+    "paid_map_keys": "paidCentsByInvoice only emits a key for invoices that have >=1 non-void payment. Invoices with none are absent from the map; consumers read `paid[id] ?? 0`."
+  },
+
+  "seed": {
+    "clients": [
+      { "id": 1, "name": "Acme Builders", "isActive": 1, "phoneNumber": "555-0100" }
+    ],
+
+    "projects": [
+      { "id": 1, "projectName": "Riverside Reno", "clientId": 1, "pricingModel": "hourly", "projectPrice": null, "expenseMarkupPercentage": 15.0, "taxRate": 5.0 },
+      { "id": 2, "projectName": "Downtown Fitout", "clientId": 1, "pricingModel": "fixed", "projectPrice": 500000, "expenseMarkupPercentage": 15.0, "taxRate": 5.0 }
+    ],
+
+    "invoices": [
+      { "id": 1, "invoiceNumber": "INV-0001", "invoiceDate": "2026-07-01", "clientId": 1, "projectId": 1, "invoiceType": "progress", "subtotal": 10000, "totalAmount": 10000, "isSent": 0, "isDeleted": 0 },
+      { "id": 2, "invoiceNumber": "INV-0002", "invoiceDate": "2026-07-05", "clientId": 1, "projectId": 1, "invoiceType": "progress", "subtotal": 10000, "totalAmount": 10000, "isSent": 1, "isDeleted": 0 },
+      { "id": 3, "invoiceNumber": "INV-0003", "invoiceDate": "2026-07-02", "clientId": 1, "projectId": 2, "invoiceType": "extras",   "subtotal": 20000, "totalAmount": 20000, "isSent": 1, "isDeleted": 0 },
+      { "id": 4, "invoiceNumber": "INV-0004", "invoiceDate": "2026-07-07", "clientId": 1, "projectId": 1, "invoiceType": "progress", "subtotal": 15000, "totalAmount": 15000, "isSent": 1, "isDeleted": 0 },
+      { "id": 5, "invoiceNumber": "INV-0005", "invoiceDate": "2026-07-08", "clientId": 1, "projectId": 2, "invoiceType": "extras",   "subtotal": 10000, "totalAmount": 10000, "isSent": 1, "isDeleted": 0 },
+      { "id": 6, "invoiceNumber": "INV-0006", "invoiceDate": "2026-07-06", "clientId": 1, "projectId": 2, "invoiceType": "extras",   "subtotal": 10000, "totalAmount": 10000, "isSent": 1, "isDeleted": 0 },
+      { "id": 7, "invoiceNumber": "INV-0007", "invoiceDate": "2026-07-04", "clientId": 1, "projectId": 2, "invoiceType": "progress", "subtotal": 10000, "totalAmount": 10000, "isSent": 0, "isDeleted": 0 },
+      { "id": 8, "invoiceNumber": "INV-0008", "invoiceDate": "2026-07-09", "clientId": 1, "projectId": 1, "invoiceType": "progress", "subtotal": 10000, "totalAmount": 10000, "isSent": 1, "isDeleted": 1, "deletedReasonCode": "error", "deletedDate": "2026-07-10" },
+      { "id": 9, "invoiceNumber": "INV-0009", "invoiceDate": "2026-07-03", "clientId": 1, "projectId": 1, "invoiceType": "progress", "subtotal": 0, "totalAmount": 0, "isSent": 0, "isDeleted": 0 }
+    ],
+
+    "invoice_payments": [
+      { "id": 1, "invoiceId": 3, "amount": 5000,  "paymentDate": "2026-07-03", "createdAt": "2026-07-03", "isVoid": 0 },
+      { "id": 2, "invoiceId": 4, "amount": 15000, "paymentDate": "2026-07-07", "createdAt": "2026-07-07", "isVoid": 0 },
+      { "id": 3, "invoiceId": 5, "amount": 9999,  "paymentDate": "2026-07-08", "createdAt": "2026-07-08", "isVoid": 0 },
+      { "id": 4, "invoiceId": 6, "amount": 9998,  "paymentDate": "2026-07-06", "createdAt": "2026-07-06", "isVoid": 0 },
+      { "id": 5, "invoiceId": 7, "amount": 6000,  "paymentDate": "2026-07-04", "createdAt": "2026-07-04", "isVoid": 0 },
+      { "id": 6, "invoiceId": 7, "amount": 5000,  "paymentDate": "2026-07-04", "createdAt": "2026-07-04", "isVoid": 1, "voidReasonCode": "duplicate", "voidDate": "2026-07-05" },
+      { "id": 7, "invoiceId": 8, "amount": 10000, "paymentDate": "2026-07-09", "createdAt": "2026-07-09", "isVoid": 0 }
+    ]
+  },
+
+  "expectations": {
+    "paidCentsByInvoice": {
+      "_comment": "Keys only for invoices with >=1 non-void payment. Invoice 7 excludes its voided 5000 (naive sum would be 11000).",
+      "3": 5000,
+      "4": 15000,
+      "5": 9999,
+      "6": 9998,
+      "7": 6000,
+      "8": 10000
+    },
+
+    "invoiceStatus": {
+      "1": { "status": "draft",   "case": "no payments, not sent" },
+      "2": { "status": "sent",    "case": "no payments, isSent=1" },
+      "3": { "status": "partial", "case": "5000 of 20000 paid" },
+      "4": { "status": "paid",    "case": "exact full payment" },
+      "5": { "status": "paid",    "case": "VERIFY #4 — 1 cent short (9999/10000), tolerance applies" },
+      "6": { "status": "partial", "case": "VERIFY #5 — 2 cents short (9998/10000), tolerance does NOT apply" },
+      "7": { "status": "partial", "case": "VERIFY #6 — void payment excluded; paid=6000 not 11000" },
+      "8": { "status": "voided",  "case": "VERIFY #7 — isDeleted overrides a full payment" },
+      "9": { "status": "draft",   "case": "VERIFY #8 — totalAmount=0 is NOT 'paid' (guard totalAmount>0)" }
+    },
+
+    "invoiceDetail": {
+      "_comment": "paidCents is now a constructor field sourced from the shared map (was a self-summing getter). balanceDue in DOLLARS.",
+      "1": { "paidCents": 0,     "balanceDue": 100.00 },
+      "2": { "paidCents": 0,     "balanceDue": 100.00 },
+      "3": { "paidCents": 5000,  "balanceDue": 150.00 },
+      "4": { "paidCents": 15000, "balanceDue": 0.00 },
+      "5": { "paidCents": 9999,  "balanceDue": 0.01 },
+      "6": { "paidCents": 9998,  "balanceDue": 0.02 },
+      "7": { "paidCents": 6000,  "balanceDue": 40.00 },
+      "8": { "paidCents": 10000, "balanceDue": 0.00 },
+      "9": { "paidCents": 0,     "balanceDue": 0.00 }
+    },
+
+    "invoiceList": {
+      "activeTab": {
+        "invoiceIds": [1, 2, 3, 6, 7, 9],
+        "projectGroups": [
+          { "projectName": "Downtown Fitout", "invoiceIdsInDateDesc": [6, 7, 3], "totalDollars": 400.00 },
+          { "projectName": "Riverside Reno",  "invoiceIdsInDateDesc": [2, 9, 1], "totalDollars": 200.00 }
+        ]
+      },
+      "paidTab": {
+        "invoiceIds": [4, 5],
+        "projectGroups": [
+          { "projectName": "Downtown Fitout", "invoiceIdsInDateDesc": [5], "totalDollars": 99.99 },
+          { "projectName": "Riverside Reno",  "invoiceIdsInDateDesc": [4], "totalDollars": 150.00 }
+        ]
+      },
+      "voidedView": {
+        "showVoided": true,
+        "invoiceIds": [8],
+        "projectGroups": [
+          { "projectName": "Riverside Reno", "invoiceIdsInDateDesc": [8], "totalDollars": 100.00 }
+        ]
+      }
+    }
+  }
+}

@@ -281,8 +281,12 @@ class _CompanyTaxTabState extends ConsumerState<CompanyTaxTab> {
                       Expanded(
                         flex: 2,
                         child: TextField(
+                          // A user-labelled slot, not an acronym we control —
+                          // "GST" and "Sales Tax" are both valid, so no caps
+                          // lock. `characters` holds the keyboard in caps for
+                          // every keystroke, making lowercase untypeable.
                           controller: tax1NameController,
-                          textCapitalization: TextCapitalization.characters,
+                          textCapitalization: TextCapitalization.none,
                           decoration: _dec('Tax 1 Name (e.g. GST)'),
                         ),
                       ),
@@ -299,8 +303,11 @@ class _CompanyTaxTabState extends ConsumerState<CompanyTaxTab> {
                   ),
                   gap,
                   TextField(
+                    // An identifier the tax authority issued (e.g.
+                    // 123456789RT0001) — reproduced exactly as given, so no
+                    // capitalization styling.
                     controller: tax1RegController,
-                    textCapitalization: TextCapitalization.characters,
+                    textCapitalization: TextCapitalization.none,
                     decoration: _dec('Tax 1 Registration #'),
                   ),
                 ],
@@ -319,8 +326,9 @@ class _CompanyTaxTabState extends ConsumerState<CompanyTaxTab> {
                       Expanded(
                         flex: 2,
                         child: TextField(
+                          // User-labelled slot — see Tax 1 Name above.
                           controller: tax2NameController,
-                          textCapitalization: TextCapitalization.characters,
+                          textCapitalization: TextCapitalization.none,
                           decoration: _dec('Tax 2 Name'),
                         ),
                       ),
@@ -337,8 +345,9 @@ class _CompanyTaxTabState extends ConsumerState<CompanyTaxTab> {
                   ),
                   gap,
                   TextField(
+                    // Issued identifier — see Tax 1 Registration # above.
                     controller: tax2RegController,
-                    textCapitalization: TextCapitalization.characters,
+                    textCapitalization: TextCapitalization.none,
                     decoration: _dec('Tax 2 Registration #'),
                   ),
                 ],
