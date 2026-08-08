@@ -71,7 +71,7 @@ final importControllerProvider =
 /// Drives a single export action. On success its value is the saved file name;
 /// `null` means idle OR the user dismissed the save dialog (web). Builds the
 /// file name the same way the original app did (optional custom name + date,
-/// else a full timestamp) and writes it via the platform [exportJsonFile]
+/// else a full timestamp) and writes it via the platform [exportTextFile]
 /// helper (which prompts for a location on web/PWA).
 class ExportController extends AsyncNotifier<String?> {
   @override
@@ -84,9 +84,11 @@ class ExportController extends AsyncNotifier<String?> {
       // Pass the JSON builder as a callback: on web the platform helper must
       // open the save picker *before* any await (user-activation rule), so the
       // DB read only runs after a location is chosen.
-      final saved = await exportJsonFile(
+      final saved = await exportTextFile(
         fileName,
-        () => ref.read(backupRepositoryProvider).exportToJsonString(),
+        mimeType: 'application/json',
+        buildContent: () =>
+            ref.read(backupRepositoryProvider).exportToJsonString(),
       );
       return saved ? fileName : null;
     });

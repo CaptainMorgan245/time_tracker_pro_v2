@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
-/// In-app PDF preview for an already-rendered invoice.
+/// In-app preview for an already-rendered PDF — invoices and statements alike.
 ///
 /// Exists so the preview is a normal pushed route the user can back out of.
 /// `Printing.layoutPdf` hands straight off to the platform print UI, which on
@@ -13,21 +13,27 @@ import 'package:printing/printing.dart';
 ///
 /// Takes the finished [bytes] rather than a builder: the caller already built
 /// them (and reported any failure), so this screen can't fail to render.
-class InvoicePdfPreviewScreen extends StatelessWidget {
-  const InvoicePdfPreviewScreen({
+class PdfPreviewScreen extends StatelessWidget {
+  const PdfPreviewScreen({
     super.key,
-    required this.invoiceNumber,
+    required this.title,
+    required this.fileName,
     required this.bytes,
   });
 
-  final String invoiceNumber;
+  /// AppBar title, e.g. `Invoice INV-2026-015` or `Kelly Fry — Statement`.
+  final String title;
+
+  /// Suggested filename for print/share, including the `.pdf` extension.
+  final String fileName;
+
   final Uint8List bytes;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Invoice $invoiceNumber'),
+        title: Text(title),
         leading: IconButton(
           icon: const Icon(Icons.close),
           tooltip: 'Close preview',
@@ -37,12 +43,12 @@ class InvoicePdfPreviewScreen extends StatelessWidget {
       body: PdfPreview(
         build: (_) => bytes,
         initialPageFormat: PdfPageFormat.letter,
-        // The invoice is laid out for Letter; letting the user reformat here
+        // Every document here is laid out for Letter; letting the user reformat
         // would only re-render the same fixed layout on a different sheet.
         canChangePageFormat: false,
         canChangeOrientation: false,
         canDebug: false,
-        pdfFileName: 'Invoice_$invoiceNumber.pdf',
+        pdfFileName: fileName,
       ),
     );
   }

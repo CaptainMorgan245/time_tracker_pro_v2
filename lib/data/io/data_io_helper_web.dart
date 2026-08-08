@@ -3,16 +3,20 @@ import 'dart:js_interop_unsafe';
 
 import 'package:web/web.dart';
 
-/// Web / PWA backup export.
+/// Web / PWA file export (backup JSON, report CSV).
 ///
 /// Where supported (Chromium desktop / installed PWA, secure context), uses the
 /// File System Access API (`window.showSaveFilePicker`) so the user chooses the
 /// save location. That call MUST run synchronously inside the click gesture —
 /// before any `await` — or the browser blocks it for lack of user activation.
-/// So the picker is invoked first, and [buildJson] (async DB work) only runs
+/// So the picker is invoked first, and [buildContent] (async DB work) only runs
 /// *after* a location is chosen. `showSaveFilePicker` isn't in package:web's
 /// typed bindings, so it's called via js_interop_unsafe; the returned
 /// handle/stream use the typed API.
+///
+/// [mimeType] is the Blob type — `'application/json'` for a backup,
+/// `CsvExportService.mimeType` for a report — so the browser labels a download
+/// correctly rather than calling every file JSON.
 ///
 /// The write is confirmed: `write` + `close` must resolve, and the file is read
 /// back and checked to be non-empty. Any failure throws (surfaced as an error)
@@ -21,16 +25,17 @@ import 'package:web/web.dart';
 ///
 /// Falls back to a plain browser download where the API is unavailable
 /// (Firefox/Safari, or a non-secure context).
-Future<bool> exportJsonFile(
-  String suggestedName,
-  Future<String> Function() buildJson,
-) async {
+Future<bool> exportTextFile(
+  String fileName, {
+  required String mimeType,
+  required Future<String> Function() buildContent,
+}) async {
   final win = window as JSObject;
   if (win.has('showSaveFilePicker')) {
     final FileSystemFileHandle handle;
     try {
       final options = JSObject()
-        ..setProperty('suggestedName'.toJS, suggestedName.toJS);
+        ..setProperty('suggestedName'.toJS, fileName.toJS);
       // First thing after the gesture — no await before this call.
       final picked = await win
           .callMethod<JSPromise<JSAny?>>('showSaveFilePicker'.toJS, options)
@@ -41,10 +46,10 @@ Future<bool> exportJsonFile(
       rethrow; // a real picker failure — surface it
     }
 
-    final json = await buildJson();
+    final content = await buildContent();
     final blob = Blob(
-      [json.toJS].toJS,
-      BlobPropertyBag(type: 'application/json'),
+      [content.toJS].toJS,
+      BlobPropertyBag(type: mimeType),
     );
 
     final writable = await handle.createWritable().toDart;
@@ -67,15 +72,15 @@ Future<bool> exportJsonFile(
   // Fallback: no File System Access API. Generate, then download to the
   // browser's default location. The anchor is attached to the DOM so the
   // programmatic click reliably triggers the download.
-  final json = await buildJson();
-  _triggerDownload(suggestedName, json);
+  final content = await buildContent();
+  _triggerDownload(fileName, content, mimeType);
   return true;
 }
 
-void _triggerDownload(String fileName, String json) {
+void _triggerDownload(String fileName, String content, String mimeType) {
   final blob = Blob(
-    [json.toJS].toJS,
-    BlobPropertyBag(type: 'application/json'),
+    [content.toJS].toJS,
+    BlobPropertyBag(type: mimeType),
   );
   final url = URL.createObjectURL(blob);
   final anchor = document.createElement('a') as HTMLAnchorElement

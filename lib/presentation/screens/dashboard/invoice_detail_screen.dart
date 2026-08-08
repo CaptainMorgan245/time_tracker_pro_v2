@@ -10,8 +10,10 @@ import '../../providers/invoice_providers.dart';
 import '../../services/invoice_pdf_service.dart';
 import '../../widgets/async_value_view.dart';
 import '../../widgets/final_invoice_statement_view.dart';
+import '../pdf_preview_screen.dart';
+import 'invoices/close_out_contract_dialog.dart';
+import 'invoices/edit_invoice_details_screen.dart';
 import 'invoices/fixed_price_invoice_screen.dart';
-import 'invoices/invoice_pdf_preview_screen.dart';
 import 'invoices/record_payment_dialog.dart';
 import 'invoices/time_materials_invoice_screen.dart';
 import 'invoices/void_invoice_dialog.dart';
@@ -304,8 +306,9 @@ class _ActionBar extends ConsumerWidget {
       final bytes = await InvoicePdfService.build(data, statement: statement);
       if (!context.mounted) return;
       await Navigator.of(context).push(MaterialPageRoute(
-        builder: (_) => InvoicePdfPreviewScreen(
-          invoiceNumber: data.invoice.invoiceNumber,
+        builder: (_) => PdfPreviewScreen(
+          title: 'Invoice ${data.invoice.invoiceNumber}',
+          fileName: 'Invoice_${data.invoice.invoiceNumber}.pdf',
           bytes: bytes,
         ),
       ));
@@ -318,15 +321,80 @@ class _ActionBar extends ConsumerWidget {
     }
   }
 
-  void _editInvoice(BuildContext context) {
+  /// Routes to the full editor or the metadata-only one, per the invoice's
+  /// [InvoiceEditScope]. A paid invoice keeps an Edit button — it just lands on
+  /// the screen that can't touch money.
+  void _editInvoice(BuildContext context, InvoiceEditScope scope) {
     final inv = data.invoice;
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => inv.invoiceType == 'extras'
-          ? TimeMaterialsInvoiceScreen(
-              projectId: inv.projectId, editingInvoiceId: inv.id)
-          : FixedPriceInvoiceScreen(
-              projectId: inv.projectId, editingInvoiceId: inv.id),
+      builder: (_) => switch (scope) {
+        InvoiceEditScope.metadataOnly =>
+          EditInvoiceDetailsScreen(invoiceId: inv.id),
+        _ => inv.invoiceType == 'extras'
+            ? TimeMaterialsInvoiceScreen(
+                projectId: inv.projectId, editingInvoiceId: inv.id)
+            : FixedPriceInvoiceScreen(
+                projectId: inv.projectId, editingInvoiceId: inv.id),
+      },
     ));
+  }
+
+  /// Mark Sent, first checking whether this invoice closes out its fixed-price
+  /// contract. If it does, offer to retype it as the final invoice before it
+  /// goes out — the cheap moment to fix what otherwise has to be corrected after
+  /// the invoice has been sent and paid.
+  ///
+  /// "Mark as Final" here is a type-only change routed through
+  /// [InvoiceEditActions.updateInvoiceMetadata], so it cannot alter the billed
+  /// amount. That is safe precisely because the prompt's trigger condition is
+  /// that billing already reaches the contract total.
+  Future<void> _markSent(
+    BuildContext context,
+    WidgetRef ref,
+    Future<void> Function(Future<void> Function(), String) guardSnack,
+  ) async {
+    final inv = data.invoice;
+    final closesOut =
+        ref.read(closesOutContractProvider(inv.id)).asData?.value ?? false;
+
+    if (closesOut) {
+      final statement =
+          ref.read(finalInvoiceStatementProvider(finalInvoiceParamsFor(inv)));
+      final contractTotal =
+          statement.asData?.value?.contractTotalCents ?? inv.totalAmount;
+      final choice = await showCloseOutContractDialog(
+        context,
+        contractTotalCents: contractTotal,
+        currentTypeLabel: invoiceTypeLabel(inv.invoiceType),
+      );
+      if (choice == null || !context.mounted) return; // cancelled — send nothing
+
+      if (choice == CloseOutChoice.markFinalAndSend) {
+        await ref.read(invoiceEditActionsProvider.notifier).updateInvoiceMetadata(
+              original: inv,
+              invoiceType: 'final',
+              poNumber: inv.poNumber,
+              workDescription: inv.workDescription,
+              notes: inv.notes,
+              internalNotes: inv.internalNotes,
+              date: DateTime.tryParse(inv.invoiceDate) ?? DateTime.now(),
+            );
+        if (!context.mounted) return;
+        final e = ref.read(invoiceEditActionsProvider);
+        if (e.hasError) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Could not retype the invoice: ${e.error}'),
+            backgroundColor: Colors.red,
+          ));
+          return;
+        }
+      }
+    }
+
+    await guardSnack(
+      () => ref.read(invoiceActionsProvider.notifier).markSent(inv),
+      'Marked as sent.',
+    );
   }
 
   Future<void> _sharePdf(
@@ -351,7 +419,11 @@ class _ActionBar extends ConsumerWidget {
     final inv = data.invoice;
     final fullyPaid = data.status == InvoiceStatus.paid;
     final locked = fullyPaid || inv.isDeleted != 0;
-    final busy = ref.watch(invoiceActionsProvider).isLoading;
+    // Single source for what may still be edited — the same rule the write
+    // actions enforce, so the button can't offer something the action refuses.
+    final scope = invoiceEditScopeFor(inv, data.paidCents);
+    final busy = ref.watch(invoiceActionsProvider).isLoading ||
+        ref.watch(invoiceEditActionsProvider).isLoading;
     // Same statement the document renders, so the PDF matches what's on screen.
     final statement = inv.invoiceType == 'final'
         ? ref
@@ -400,20 +472,22 @@ class _ActionBar extends ConsumerWidget {
               icon: const Icon(Icons.share),
               label: const Text('Share PDF'),
             ),
-            // Editable until paid or voided (draft, sent, or partially paid).
-            if (!fullyPaid && inv.isDeleted == 0)
+            // Editable unless voided. Paid in full narrows the edit to
+            // metadata — type, date, notes — with every amount frozen; the
+            // button says which it is so the scope is clear before tapping.
+            if (scope != InvoiceEditScope.none)
               FilledButton.tonalIcon(
-                onPressed: () => _editInvoice(context),
-                icon: const Icon(Icons.edit),
-                label: const Text('Edit'),
+                onPressed: () => _editInvoice(context, scope),
+                icon: Icon(scope == InvoiceEditScope.metadataOnly
+                    ? Icons.edit_note
+                    : Icons.edit),
+                label: Text(scope == InvoiceEditScope.metadataOnly
+                    ? 'Edit Details'
+                    : 'Edit'),
               ),
             if (inv.isSent == 0 && !locked)
               FilledButton.tonalIcon(
-                onPressed: busy
-                    ? null
-                    : () => guardSnack(
-                        () => ref.read(invoiceActionsProvider.notifier).markSent(inv),
-                        'Marked as sent.'),
+                onPressed: busy ? null : () => _markSent(context, ref, guardSnack),
                 icon: const Icon(Icons.send),
                 label: const Text('Mark Sent'),
               ),

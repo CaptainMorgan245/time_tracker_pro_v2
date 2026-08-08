@@ -35,7 +35,7 @@ void main() {
   const titleId = 3;
 
   final employeeById = {
-    employeeId: DbEmployee(
+    employeeId: const DbEmployee(
       id: employeeId,
       name: 'Test Employee',
       titleId: titleId,
@@ -43,7 +43,8 @@ void main() {
     ),
   };
   final roleById = {
-    titleId: DbRole(id: titleId, name: 'Technician', standardRate: roleRate),
+    titleId:
+        const DbRole(id: titleId, name: 'Technician', standardRate: roleRate),
   };
 
   group('hourlyRateCents', () {

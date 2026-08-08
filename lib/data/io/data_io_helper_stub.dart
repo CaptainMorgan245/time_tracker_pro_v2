@@ -1,7 +1,8 @@
 /// Fallback used when neither `dart:io` nor `dart:js_interop` is available.
-Future<bool> exportJsonFile(
-  String fileName,
-  Future<String> Function() buildJson,
-) {
-  throw UnsupportedError('exportJsonFile is not supported on this platform.');
+Future<bool> exportTextFile(
+  String fileName, {
+  required String mimeType,
+  required Future<String> Function() buildContent,
+}) {
+  throw UnsupportedError('exportTextFile is not supported on this platform.');
 }

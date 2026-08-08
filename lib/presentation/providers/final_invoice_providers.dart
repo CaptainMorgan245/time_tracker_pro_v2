@@ -206,6 +206,55 @@ final finalInvoiceStatementProvider = Provider.family<
 });
 
 // ---------------------------------------------------------------------------
+// Retyping an existing invoice to 'final'
+// ---------------------------------------------------------------------------
+
+/// Why an invoice can't be retyped as the contract's final invoice, or null if
+/// it can. The message is shown verbatim next to the disabled option.
+///
+/// A final invoice does not display its stored total — the detail screen and the
+/// PDF both render the *reconciled* balance from [FinalInvoiceStatement]. So
+/// retyping only reads correctly when the two agree, and this is the check that
+/// they do. [statement] must be built with `excludeInvoiceId: inv.id` (use
+/// [finalInvoiceParamsFor]) so the invoice isn't reconciled against itself.
+///
+/// The tax-2 and discount conditions are not arithmetic quibbles: a contract
+/// total is GST-only by definition (see [FinalInvoiceLine.amountCents]), so an
+/// invoice carrying either can never reconcile against one no matter what the
+/// figures happen to say.
+///
+/// This is a point-in-time check. Adding a further draw to the contract
+/// afterwards will move the reconciled balance away from this invoice's stored
+/// total again — but that is a pre-existing property of final invoices (they
+/// re-derive on every render), not something retyping introduces.
+String? finalRetypeBlocker(DbInvoice inv, FinalInvoiceStatement? statement) {
+  if (inv.invoiceType == 'final') return null; // already final
+  if (!contractInvoiceTypes.contains(inv.invoiceType)) {
+    return 'Only a deposit or progress draw on a fixed-price contract can '
+        'become the final invoice.';
+  }
+  if (statement == null) {
+    return 'This project has no fixed contract price to reconcile against.';
+  }
+  if ((inv.tax2Rate ?? 0) != 0 || inv.tax2Amount != 0) {
+    return 'This invoice carries a second tax. A contract total is '
+        '${inv.tax1Name ?? 'GST'}-only, so it cannot be reconciled as the '
+        'final invoice.';
+  }
+  if (inv.discountAmount != 0 || inv.discountPercent != 0) {
+    return 'This invoice carries a discount, so it cannot be reconciled '
+        'against the contract total as the final invoice.';
+  }
+  // 1-cent tolerance, matching `isInvoiceFullyPaid` and the rest of the app.
+  if ((statement.balanceDueCents - inv.totalAmount).abs() > 1) {
+    return 'Retyping this as the final invoice would make it display the '
+        'reconciled contract balance instead of the amount actually billed. '
+        'They do not currently match.';
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Insert companion
 // ---------------------------------------------------------------------------
 

@@ -27,6 +27,11 @@ Future<void> runTimeImport(BuildContext context, WidgetRef ref) async {
     withData: true,
   );
   if (picked == null) return; // cancelled
+  // The file picker is the only async gap before the messages below. [_snack]
+  // re-checks `mounted` itself, but that check is invisible to
+  // `use_build_context_synchronously` across a function boundary — this one is
+  // here so the guard is visible at the gap it actually guards.
+  if (!context.mounted) return;
 
   final bytes = picked.files.single.bytes;
   if (bytes == null) {

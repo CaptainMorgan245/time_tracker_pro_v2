@@ -292,8 +292,12 @@ class InvoiceActions extends Notifier<AsyncValue<void>> {
   InvoiceRepository get _repo => ref.read(invoiceRepositoryProvider);
   AppDatabase get _db => ref.read(databaseProvider);
 
+  /// Marks [inv] sent via a targeted column write rather than a full-row
+  /// replace, so it cannot write back a stale copy of every other column. The
+  /// send-time "mark as final" flow retypes the invoice immediately before
+  /// calling this — a replace here would undo that retype.
   Future<void> markSent(DbInvoice inv) => _run(() async {
-        await _repo.update(inv.toCompanion(false).copyWith(isSent: const Value(1)));
+        await _db.invoicesDao.setSent(inv.id);
       });
 
   Future<void> recordPayment(
@@ -449,6 +453,54 @@ final fixedPriceSummaryProvider =
       billedCents: billed.billedCents,
       gstCollectedCents: billed.gstCents,
     );
+  });
+});
+
+/// Whether sending invoice [invoiceId] would close out its fixed-price
+/// contract — i.e. the draws billed against it now reach the full contract
+/// total, so this invoice is almost certainly the final one.
+///
+/// Checked at send time to catch the mistake before the invoice goes out,
+/// rather than relying on correcting the type after it has been paid.
+///
+/// True only when all of these hold:
+///   - the project is a priced fixed-price project;
+///   - the invoice is a contract draw (`deposit`/`progress`) and not already
+///     `final` — `'extras'` bills *above* the contract and never closes it;
+///   - billed-to-date reaches the contract total (1-cent tolerance). Over-billed
+///     counts too: that is an even stronger signal something is mistyped.
+///
+/// `fixedPriceBilled` has no `isSent` filter, so the invoice about to be sent is
+/// already included in the billed figure — no adjustment is needed here.
+final closesOutContractProvider =
+    Provider.family<AsyncValue<bool>, int>((ref, invoiceId) {
+  final invoicesA = ref.watch(invoicesStreamProvider);
+  final projectsA = ref.watch(projectsStreamProvider);
+
+  return _combine([invoicesA, projectsA], () {
+    final inv =
+        _firstOrNull(invoicesA.requireValue.where((i) => i.id == invoiceId));
+    if (inv == null || inv.isDeleted != 0) return false;
+    if (inv.invoiceType == 'final' ||
+        !contractInvoiceTypes.contains(inv.invoiceType)) {
+      return false;
+    }
+
+    final project = _firstOrNull(
+        projectsA.requireValue.where((p) => p.id == inv.projectId));
+    if (project == null ||
+        project.pricingModel != 'fixed' ||
+        (project.projectPrice ?? 0) <= 0) {
+      return false;
+    }
+
+    // The contract's GST is taken at THIS invoice's rate, matching how
+    // `finalInvoiceParamsFor` builds the reconciliation the prompt leads to.
+    final contractPrice = project.projectPrice ?? 0;
+    final contractTotal =
+        contractPrice + taxAmountCents(contractPrice, inv.tax1Rate ?? 0);
+    final billed = fixedPriceBilled(invoicesA.requireValue, inv.projectId);
+    return billed.billedCents + billed.gstCents >= contractTotal - 1;
   });
 });
 

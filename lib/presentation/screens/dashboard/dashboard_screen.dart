@@ -8,6 +8,8 @@ import '../data_management_screen.dart';
 import '../database_viewer_screen.dart';
 import '../payroll_screen.dart';
 import '../settings_screen.dart';
+import '../statements/client_statement_screen.dart';
+import '../statements/project_statement_screen.dart';
 import 'analytics_screen.dart';
 import 'cost_entry_screen.dart';
 import 'dashboard_home_tab.dart';
@@ -178,6 +180,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               leading: const Icon(Icons.schedule),
               title: const Text('Project Disbursements'),
               onTap: () => _open(const PayrollScreen()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.receipt_long),
+              title: const Text('Client Statement'),
+              onTap: () => _open(const ClientStatementScreen()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.description_outlined),
+              title: const Text('Project Statement'),
+              onTap: () => _open(const ProjectStatementScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.settings_outlined),

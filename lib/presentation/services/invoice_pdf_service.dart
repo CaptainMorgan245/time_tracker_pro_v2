@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 
-import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../data/local/drift/app_database.dart';
 import '../providers/final_invoice_providers.dart' show FinalInvoiceStatement;
 import '../providers/invoice_providers.dart' show InvoiceDetailData, InvoiceStatus;
+import 'pdf_theme.dart';
 
 /// Renders a print-ready invoice PDF (US Letter) from an already-assembled
 /// [InvoiceDetailData] — the same view-model that backs the on-screen invoice
@@ -20,15 +20,9 @@ import '../providers/invoice_providers.dart' show InvoiceDetailData, InvoiceStat
 class InvoicePdfService {
   const InvoicePdfService._();
 
-  static const _accent = PdfColor.fromInt(0xFFE8720C); // Dyconn orange
-  static const _sectionBar = PdfColor.fromInt(0xFF2D2D2D);
-  static const _voidWash = PdfColor.fromInt(0x22E53935); // translucent red
-  static const _pageMargin = 40.0;
-
-  static final _money =
-      NumberFormat.currency(locale: 'en_US', symbol: '\$', decimalDigits: 2);
-  static final _dateFmt = DateFormat('MMMM d, yyyy');
-  static final _lineDateFmt = DateFormat('MMM d, yyyy');
+  /// Translucent red for the VOID watermark — invoice-specific, so it stays
+  /// here rather than in the shared theme.
+  static const _voidWash = PdfColor.fromInt(0x22E53935);
 
   static const _typeLabels = {
     'progress': 'Progress Draw',
@@ -38,16 +32,6 @@ class InvoicePdfService {
     'extras': 'Time & Materials',
     'final': 'Final Invoice',
   };
-
-  /// Cents → `$1,234.56`. Negatives render as `-$1.00`. Never re-rounds; input
-  /// is already whole cents.
-  static String _fmtMoney(int cents) => _money.format(cents / 100);
-
-  static String _fmtDate(String? iso) {
-    if (iso == null || iso.isEmpty) return '';
-    final d = DateTime.tryParse(iso);
-    return d == null ? '' : _dateFmt.format(d);
-  }
 
   /// Builds the invoice PDF bytes. Safe to call for any status: voided invoices
   /// get a diagonal "VOID" watermark + notice rather than being refused.
@@ -72,12 +56,12 @@ class InvoicePdfService {
       pw.MultiPage(
         pageTheme: pw.PageTheme(
           pageFormat: PdfPageFormat.letter,
-          margin: const pw.EdgeInsets.all(_pageMargin),
+          margin: const pw.EdgeInsets.all(kPdfPageMargin),
           buildBackground: isVoid ? (_) => _voidBackground() : null,
         ),
         build: (context) => [
           _header(data),
-          pw.Divider(color: _accent, height: 24),
+          pw.Divider(color: kPdfAccent, height: 24),
           if (isVoid) ...[
             _voidNotice(inv),
             pw.SizedBox(height: 12),
@@ -149,16 +133,16 @@ class InvoicePdfService {
               style: pw.TextStyle(
                 fontSize: 18,
                 fontWeight: pw.FontWeight.bold,
-                color: _accent,
+                color: kPdfAccent,
               ),
             ),
             if ((c?.companyAddress ?? '').isNotEmpty)
-              pw.Text(c!.companyAddress!, style: _body),
-            if (cityLine.isNotEmpty) pw.Text(cityLine, style: _body),
+              pw.Text(c!.companyAddress!, style: kPdfBody),
+            if (cityLine.isNotEmpty) pw.Text(cityLine, style: kPdfBody),
             if ((c?.companyPhone ?? '').isNotEmpty)
-              pw.Text('Tel: ${c!.companyPhone}', style: _body),
+              pw.Text('Tel: ${c!.companyPhone}', style: kPdfBody),
             if ((c?.companyEmail ?? '').isNotEmpty)
-              pw.Text(c!.companyEmail!, style: _body),
+              pw.Text(c!.companyEmail!, style: kPdfBody),
           ],
         ),
         pw.Column(
@@ -168,11 +152,19 @@ class InvoicePdfService {
                 style: pw.TextStyle(
                     fontSize: 18, fontWeight: pw.FontWeight.bold)),
             pw.Text(_typeLabels[inv.invoiceType] ?? inv.invoiceType,
-                style: _body),
-            pw.Text('Invoice #: ${inv.invoiceNumber}', style: _body),
-            pw.Text('Date: ${_fmtDate(inv.invoiceDate)}', style: _body),
+                style: kPdfBody),
+            pw.Text('Invoice #: ${inv.invoiceNumber}', style: kPdfBody),
+            pw.Text('Date: ${pdfIsoDate(inv.invoiceDate)}', style: kPdfBody),
             if ((inv.poNumber ?? '').trim().isNotEmpty)
-              pw.Text('PO #: ${inv.poNumber!.trim()}', style: _body),
+              pw.Text('PO #: ${inv.poNumber!.trim()}', style: kPdfBody),
+            // Payment address sits here rather than in the footer: the footer is
+            // the part that gets pushed onto an overflow page, and an e-transfer
+            // address the client can't find is the one line that must not move.
+            if ((c?.paymentEtransferEmail ?? '').trim().isNotEmpty) ...[
+              pw.SizedBox(height: 4),
+              pw.Text('E-Transfer: ${c!.paymentEtransferEmail!.trim()}',
+                  style: kPdfBody),
+            ],
           ],
         ),
       ],
@@ -184,7 +176,7 @@ class InvoicePdfService {
       if ((inv.deletedReasonCode ?? '').isNotEmpty)
         'Reason: ${inv.deletedReasonCode}',
       if ((inv.deletedDate ?? '').isNotEmpty)
-        'Voided: ${_fmtDate(inv.deletedDate)}',
+        'Voided: ${pdfIsoDate(inv.deletedDate)}',
     ];
     return pw.Container(
       width: double.infinity,
@@ -199,7 +191,9 @@ class InvoicePdfService {
                   fontWeight: pw.FontWeight.bold,
                   color: PdfColors.red800)),
           if (parts.isNotEmpty)
-            pw.Text(parts.join('   •   '),
+            // Plain hyphen, not a bullet: the base-14 PDF font renders a
+            // bullet as a missing-glyph box.
+            pw.Text(parts.join('  -  '),
                 style: const pw.TextStyle(fontSize: 9, color: PdfColors.red800)),
         ],
       ),
@@ -212,7 +206,7 @@ class InvoicePdfService {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Expanded(
-          child: _labelledBlock('BILL TO', [
+          child: pdfLabelledBlock('BILL TO', [
             data.clientName,
             if ((data.projectCity ?? '').isNotEmpty) data.projectCity!,
             if ((data.clientPhone ?? '').isNotEmpty) data.clientPhone!,
@@ -220,7 +214,7 @@ class InvoicePdfService {
         ),
         pw.SizedBox(width: 24),
         pw.Expanded(
-          child: _labelledBlock('PROJECT', [
+          child: pdfLabelledBlock('PROJECT', [
             data.projectName,
             if ((inv.projectAddress ?? '').isNotEmpty) inv.projectAddress!,
           ]),
@@ -233,13 +227,13 @@ class InvoicePdfService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        _sectionHeading('CONTRACT SUMMARY'),
+        pdfSectionHeading('CONTRACT SUMMARY'),
         pw.SizedBox(height: 6),
-        _kv('Contract Value', _fmtMoney((data.contractValue * 100).round())),
-        _kv('Previously Billed', _fmtMoney((data.totalBilled * 100).round())),
-        _kv('GST Collected', _fmtMoney((data.totalGstCollected * 100).round())),
+        pdfKeyValueRow('Contract Value', pdfMoney((data.contractValue * 100).round())),
+        pdfKeyValueRow('Previously Billed', pdfMoney((data.totalBilled * 100).round())),
+        pdfKeyValueRow('GST Collected', pdfMoney((data.totalGstCollected * 100).round())),
         pw.Divider(height: 8, color: PdfColors.grey400),
-        _kv('Balance Remaining', _fmtMoney((data.remaining * 100).round()),
+        pdfKeyValueRow('Balance Remaining', pdfMoney((data.remaining * 100).round()),
             bold: true),
       ],
     );
@@ -266,7 +260,7 @@ class InvoicePdfService {
   static pw.Widget _narrativeBlock(String heading, String text) => pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          _sectionHeading(heading),
+          pdfSectionHeading(heading),
           pw.SizedBox(height: 4),
           pw.Container(
             width: double.infinity,
@@ -275,7 +269,7 @@ class InvoicePdfService {
             ),
             padding: const pw.EdgeInsets.all(8),
             child: pw.Paragraph(
-                text: text, margin: pw.EdgeInsets.zero, style: _body),
+                text: text, margin: pw.EdgeInsets.zero, style: kPdfBody),
           ),
         ],
       );
@@ -292,29 +286,29 @@ class InvoicePdfService {
         child: pw.Column(
           children: [
             if (isTm && inv.labourSubtotal > 0)
-              _totalRow('Labour', _fmtMoney(inv.labourSubtotal)),
+              pdfKeyValueRow('Labour', pdfMoney(inv.labourSubtotal)),
             if (isTm && inv.materialsSubtotal > 0)
-              _totalRow('Materials', _fmtMoney(inv.materialsSubtotal)),
-            _totalRow('Subtotal', _fmtMoney(inv.subtotal), bold: true),
+              pdfKeyValueRow('Materials', pdfMoney(inv.materialsSubtotal)),
+            pdfKeyValueRow('Subtotal', pdfMoney(inv.subtotal), bold: true),
             if (inv.discountAmount > 0)
-              _totalRow(
+              pdfKeyValueRow(
                 inv.discountDescription ?? 'Discount',
-                '-${_fmtMoney(inv.discountAmount)}',
+                '-${pdfMoney(inv.discountAmount)}',
                 color: PdfColors.red,
               ),
             if (inv.tax1Amount > 0)
-              _totalRow(
+              pdfKeyValueRow(
                 '${inv.tax1Name ?? 'GST'} (${(inv.tax1Rate ?? 0).toStringAsFixed(1)}%)',
-                _fmtMoney(inv.tax1Amount),
+                pdfMoney(inv.tax1Amount),
               ),
             if (inv.tax2Amount > 0)
-              _totalRow(
+              pdfKeyValueRow(
                 '${inv.tax2Name ?? 'PST'} (${(inv.tax2Rate ?? 0).toStringAsFixed(1)}%)',
-                _fmtMoney(inv.tax2Amount),
+                pdfMoney(inv.tax2Amount),
               ),
-            pw.Divider(color: _accent, height: 12),
+            pw.Divider(color: kPdfAccent, height: 12),
             pw.Container(
-              color: _accent,
+              color: kPdfAccent,
               padding:
                   const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               child: pw.Row(
@@ -325,7 +319,7 @@ class InvoicePdfService {
                           fontSize: 13,
                           fontWeight: pw.FontWeight.bold,
                           color: PdfColors.white)),
-                  pw.Text(_fmtMoney(inv.totalAmount),
+                  pw.Text(pdfMoney(inv.totalAmount),
                       style: pw.TextStyle(
                           fontSize: 13,
                           fontWeight: pw.FontWeight.bold,
@@ -350,108 +344,27 @@ class InvoicePdfService {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
-        _sectionHeading('CONTRACT STATEMENT'),
+        pdfSectionHeading('CONTRACT STATEMENT'),
         pw.SizedBox(height: 6),
-        _statementRow(
+        pdfStatementRow(
             'Project Price (excl. ${s.tax1Name})', s.contractPriceCents),
-        _statementRow(s.tax1Name, s.contractGstCents),
-        _statementRow('Contract Total', s.contractTotalCents, bold: true),
+        pdfStatementRow(s.tax1Name, s.contractGstCents),
+        pdfStatementRow('Contract Total', s.contractTotalCents, bold: true),
         pw.SizedBox(height: 12),
         for (final l in s.priorLines)
-          _statementRow(l.label, l.amountCents,
-              date: _lineDateFmt.format(l.date)),
+          pdfStatementRow(l.label, l.amountCents,
+              date: pdfLineDate(l.date)),
         if (s.priorLines.isEmpty)
           pw.Padding(
             padding: const pw.EdgeInsets.symmetric(vertical: 2),
             child: pw.Text('No previous invoices on this contract.',
-                style: _body),
+                style: kPdfBody),
           ),
-        _statementRow('Total Paid to Date', -s.totalBilledToDateCents,
+        pdfStatementRow('Total Paid to Date', -s.totalBilledToDateCents,
             bold: true),
-        // Rule above the total, spanning just the amount column.
-        pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(vertical: 4),
-          child: pw.Row(
-            children: [
-              pw.Expanded(child: pw.SizedBox()),
-              pw.Container(
-                  width: _stmtAmountWidth, height: 0.8, color: _accent),
-            ],
-          ),
-        ),
-        // Vertical padding only: horizontal padding would shift the amount
-        // column off the alignment the rows above use, so the label is inset
-        // individually instead.
-        pw.Container(
-          color: _accent,
-          padding: const pw.EdgeInsets.symmetric(vertical: 6),
-          child: pw.Row(
-            children: [
-              pw.Expanded(
-                child: pw.Padding(
-                  padding: const pw.EdgeInsets.only(left: 8),
-                  child: pw.Text('BALANCE DUE',
-                      style: pw.TextStyle(
-                          fontSize: 13,
-                          fontWeight: pw.FontWeight.bold,
-                          color: PdfColors.white)),
-                ),
-              ),
-              pw.SizedBox(
-                width: _stmtAmountWidth,
-                child: pw.Text(_fmtMoney(s.balanceDueCents),
-                    style: pw.TextStyle(
-                        fontSize: 13,
-                        fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.white),
-                    textAlign: pw.TextAlign.right),
-              ),
-            ],
-          ),
-        ),
+        pdfStatementRule(),
+        pdfStatementTotalBar('BALANCE DUE', s.balanceDueCents),
       ],
-    );
-  }
-
-  /// Two columns: label (+ its date) left, amount right-aligned in a fixed
-  /// column. The amount column is the same on every row — including the BALANCE
-  /// DUE bar — so the figures form one aligned column.
-  ///
-  /// [_stmtLabelWidth] applies only to dated rows, so their dates start at a
-  /// common x instead of trailing labels of differing length.
-  static const _stmtLabelWidth = 80.0;
-  static const _stmtAmountWidth = 90.0;
-
-  /// Statement row: label and date grouped left, amount right. Negative amounts
-  /// print with a leading minus (the credit line).
-  static pw.Widget _statementRow(String label, int cents,
-      {String? date, bool bold = false}) {
-    final style = pw.TextStyle(
-      fontSize: 10,
-      fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
-    );
-    final text =
-        cents < 0 ? '-${_fmtMoney(-cents)}' : _fmtMoney(cents);
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 2),
-      child: pw.Row(
-        children: [
-          if (date != null) ...[
-            pw.SizedBox(
-                width: _stmtLabelWidth, child: pw.Text(label, style: style)),
-            pw.Expanded(
-              child: pw.Text(date,
-                  style: const pw.TextStyle(
-                      fontSize: 9, color: PdfColors.grey700)),
-            ),
-          ] else
-            pw.Expanded(child: pw.Text(label, style: style)),
-          pw.SizedBox(
-            width: _stmtAmountWidth,
-            child: pw.Text(text, style: style, textAlign: pw.TextAlign.right),
-          ),
-        ],
-      ),
     );
   }
 
@@ -477,28 +390,28 @@ class InvoicePdfService {
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.stretch,
           children: [
-            _sectionHeading(multiple ? 'PAYMENTS' : 'PAYMENT'),
+            pdfSectionHeading(multiple ? 'PAYMENTS' : 'PAYMENT'),
             pw.SizedBox(height: 4),
             for (final p in paid) ...[
-              _totalRow(
+              pdfKeyValueRow(
                 [
-                  _fmtDate(p.paymentDate),
+                  pdfIsoDate(p.paymentDate),
                   if ((p.paymentMethod ?? '').isNotEmpty) p.paymentMethod!,
                   if ((p.paymentReference ?? '').isNotEmpty)
                     '#${p.paymentReference}',
                 ].where((s) => s.isNotEmpty).join(' · '),
-                _fmtMoney(p.amount),
+                pdfMoney(p.amount),
               ),
             ],
             if (multiple) ...[
               pw.Divider(height: 8, color: PdfColors.grey400),
-              _totalRow('Total Paid', _fmtMoney(data.paidCents), bold: true),
+              pdfKeyValueRow('Total Paid', pdfMoney(data.paidCents), bold: true),
             ],
             pw.SizedBox(height: 2),
             if (fullyPaid)
-              _totalRow('PAID IN FULL', '', bold: true, color: _paidGreen)
+              pdfKeyValueRow('PAID IN FULL', '', bold: true, color: kPdfPaidGreen)
             else if (showBalance)
-              _totalRow('Balance Due', _fmtMoney(balanceCents), bold: true),
+              pdfKeyValueRow('Balance Due', pdfMoney(balanceCents), bold: true),
           ],
         ),
       ),
@@ -513,83 +426,18 @@ class InvoicePdfService {
         : c?.defaultTax1RegistrationNumber;
     return pw.Column(
       children: [
-        pw.Divider(color: _accent, height: 20),
-        pw.Center(child: pw.Text('Thank you for your business.', style: _small)),
+        pw.Divider(color: kPdfAccent, height: 20),
+        pw.Center(child: pw.Text('Thank you for your business.', style: kPdfSmall)),
         pw.SizedBox(height: 3),
         pw.Center(
-            child: pw.Text('Payment Terms: ${inv.terms}', style: _small)),
-        if ((c?.paymentEtransferEmail ?? '').trim().isNotEmpty)
-          pw.Center(
-              child: pw.Text('E-Transfer: ${c!.paymentEtransferEmail}',
-                  style: _small)),
+            child: pw.Text('Payment Terms: ${inv.terms}', style: kPdfSmall)),
+        // E-Transfer address deliberately absent — it lives in the header block
+        // now (see [_header]), so it can't end up on an overflow page.
         if ((gstReg ?? '').trim().isNotEmpty)
           pw.Center(
-              child: pw.Text('GST Registration #: $gstReg', style: _small)),
+              child: pw.Text('GST Registration #: $gstReg', style: kPdfSmall)),
       ],
     );
   }
 
-  // ── Shared pieces ─────────────────────────────────────────────────────────
-
-  static const _paidGreen = PdfColor.fromInt(0xFF2E7D32);
-  static const pw.TextStyle _body = pw.TextStyle(fontSize: 10);
-  static const pw.TextStyle _small = pw.TextStyle(fontSize: 9);
-
-  static pw.Widget _sectionHeading(String text) => pw.Text(
-        text,
-        style: pw.TextStyle(
-            fontSize: 11, fontWeight: pw.FontWeight.bold, color: _accent),
-      );
-
-  static pw.Widget _labelledBlock(String label, List<String> lines) => pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Container(
-            color: _sectionBar,
-            padding: const pw.EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            child: pw.Text(label,
-                style: pw.TextStyle(
-                    fontSize: 11,
-                    fontWeight: pw.FontWeight.bold,
-                    color: PdfColors.white)),
-          ),
-          pw.SizedBox(height: 6),
-          for (final l in lines) pw.Text(l, style: _body),
-        ],
-      );
-
-  static pw.Widget _totalRow(String label, String amount,
-      {bool bold = false, PdfColor? color}) {
-    final style = pw.TextStyle(
-      fontSize: 10,
-      fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal,
-      color: color,
-    );
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 2),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(label, style: style),
-          pw.Text(amount, style: style),
-        ],
-      ),
-    );
-  }
-
-  static pw.Widget _kv(String label, String value, {bool bold = false}) {
-    final style = pw.TextStyle(
-        fontSize: 10,
-        fontWeight: bold ? pw.FontWeight.bold : pw.FontWeight.normal);
-    return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 2),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Text(label, style: style),
-          pw.Text(value, style: style),
-        ],
-      ),
-    );
-  }
 }

@@ -155,7 +155,7 @@ class _LogPaymentDialogState extends ConsumerState<_LogPaymentDialog> {
             DropdownButtonFormField<int?>(
               isExpanded: true,
               decoration: _dec('Employee'),
-              value: empVal,
+              initialValue: empVal,
               items: [
                 const DropdownMenuItem<int?>(
                     value: null, child: Text('Select employee…')),
@@ -181,7 +181,7 @@ class _LogPaymentDialogState extends ConsumerState<_LogPaymentDialog> {
             DropdownButtonFormField<int?>(
               isExpanded: true,
               decoration: _dec('Project (optional)'),
-              value: projVal,
+              initialValue: projVal,
               items: [
                 const DropdownMenuItem<int?>(value: null, child: Text('None')),
                 ...projects.map((p) => DropdownMenuItem<int?>(

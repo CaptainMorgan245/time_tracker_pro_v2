@@ -29,7 +29,7 @@ class AnalyticsReportSelector extends ConsumerWidget {
               border: OutlineInputBorder(),
               filled: true,
             ),
-            value: selection.reportType,
+            initialValue: selection.reportType,
             items: const [
               DropdownMenuItem(
                 value: AnalyticsReportType.activeProjects,
@@ -69,13 +69,13 @@ class AnalyticsReportSelector extends ConsumerWidget {
     final label = active ? 'Select Active Project' : 'Select Completed Project';
 
     return projectsA.when(
-      loading: () => InputDecorator(
-        decoration: const InputDecoration(
+      loading: () => const InputDecorator(
+        decoration: InputDecoration(
           labelText: 'Loading…',
           border: OutlineInputBorder(),
           filled: true,
         ),
-        child: const SizedBox(
+        child: SizedBox(
           height: 24,
           child: Align(
             alignment: Alignment.centerLeft,
@@ -115,7 +115,7 @@ class AnalyticsReportSelector extends ConsumerWidget {
             border: const OutlineInputBorder(),
             filled: true,
           ),
-          value: value,
+          initialValue: value,
           items: [
             const DropdownMenuItem<int?>(
               value: null,

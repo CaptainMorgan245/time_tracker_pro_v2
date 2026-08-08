@@ -26,12 +26,12 @@ class AnalyticsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.grey.shade400,
-      child: SafeArea(
+      child: const SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: const [
+            children: [
               AnalyticsReportSelector(),
               SizedBox(height: 16),
               AnalyticsActionButtons(),

@@ -20,6 +20,80 @@ import 'reference_data_providers.dart';
 /// resolves it. See [EditableTmInvoiceData].
 
 // ---------------------------------------------------------------------------
+// Edit scope: what may be changed, given the invoice's state
+// ---------------------------------------------------------------------------
+
+/// How much of an invoice may still be changed.
+///
+/// Until this existed the only thing stopping a paid invoice being edited was a
+/// hidden button on the detail screen — nothing on the write path checked. The
+/// rule now lives here and is enforced by [InvoiceEditActions] itself, so no
+/// screen can route around it.
+enum InvoiceEditScope {
+  /// Draft, sent, or partially paid — every field editable. A partial payment
+  /// is still protected by [InvoiceEditActions._guardBelowPaid], which stops the
+  /// total dropping below what's already been received.
+  full,
+
+  /// Paid in full — **metadata only**. The billed amount can never change after
+  /// payment, so subtotal / tax / discount / total / line items are frozen.
+  /// Type, date, PO, work description and notes stay editable: an invoice that
+  /// was sent and paid as a progress draw when it should have been the final one
+  /// has to be correctable after the fact.
+  metadataOnly,
+
+  /// Voided — nothing editable.
+  none,
+}
+
+/// The scope for [inv], given [paidCents] (the sum of its non-void payments, per
+/// `paidCentsByInvoiceProvider`). Reuses [isInvoiceFullyPaid] — and its 1-cent
+/// tolerance — rather than introducing a second notion of "paid".
+InvoiceEditScope invoiceEditScopeFor(DbInvoice inv, int paidCents) {
+  if (inv.isDeleted != 0) return InvoiceEditScope.none;
+  if (isInvoiceFullyPaid(inv, paidCents)) return InvoiceEditScope.metadataOnly;
+  return InvoiceEditScope.full;
+}
+
+// ---------------------------------------------------------------------------
+// Type-change breadcrumb
+// ---------------------------------------------------------------------------
+
+const _typeChangeLabels = {
+  'deposit': 'Deposit',
+  'progress': 'Progress Draw',
+  'final': 'Final Invoice',
+  'extras': 'Time & Materials',
+};
+
+/// Appends a dated line to [existingNotes] recording an invoice-type change.
+///
+/// Internal notes are never printed on the invoice or the PDF, so this is a
+/// private breadcrumb answering "why is this typed final?" months later. It is
+/// deliberately NOT presented as an audit trail: the field is hand-editable, so
+/// the line can be removed. Real auditability would need its own table.
+///
+/// Returns [existingNotes] unchanged when the type didn't actually move, so a
+/// plain metadata save never accumulates noise.
+String? appendTypeChangeNote(
+  String? existingNotes, {
+  required String from,
+  required String to,
+  required DateTime at,
+}) {
+  if (from == to) return existingNotes;
+  final label = '${_typeChangeLabels[from] ?? from} → '
+      '${_typeChangeLabels[to] ?? to}';
+  final stamp =
+      '${at.year}-${_two(at.month)}-${_two(at.day)}';
+  final line = 'Type changed $label on $stamp.';
+  final existing = (existingNotes ?? '').trim();
+  return existing.isEmpty ? line : '$existing\n$line';
+}
+
+String _two(int n) => n.toString().padLeft(2, '0');
+
+// ---------------------------------------------------------------------------
 // Stream reads: the lines already billed to an invoice
 // ---------------------------------------------------------------------------
 
@@ -231,6 +305,62 @@ class InvoiceEditActions extends Notifier<AsyncValue<void>> {
         .fold<int>(0, (s, p) => s + p.amount);
   }
 
+  /// **Metadata-only edit** — the write path for a paid invoice.
+  ///
+  /// Its signature carries no monetary field, so it *cannot* alter subtotal,
+  /// tax, discount, total or line links. That is the point: the lock is a
+  /// property of this method's shape rather than something a screen has to
+  /// remember to enforce, so a future UI change can't leak an amount through it.
+  ///
+  /// Usable at any scope — the fully-paid case is simply the only one where it
+  /// is the *only* option. The send-time "mark as final" correction uses it too,
+  /// because that is also a type-only change.
+  ///
+  /// A change of [invoiceType] is recorded in internal notes (see
+  /// [appendTypeChangeNote]), appended to the notes as submitted so a
+  /// simultaneous hand-edit isn't clobbered.
+  Future<void> updateInvoiceMetadata({
+    required DbInvoice original,
+    required String invoiceType,
+    required String? poNumber,
+    required String? workDescription,
+    required String? notes,
+    required String? internalNotes,
+    required DateTime date,
+  }) =>
+      _run(() async {
+        await _db.invoicesDao.updateRow(
+          original.toCompanion(false).copyWith(
+                invoiceType: Value(invoiceType),
+                poNumber: Value(poNumber),
+                workDescription: Value(workDescription),
+                notes: Value(notes),
+                internalNotes: Value(appendTypeChangeNote(
+                  internalNotes,
+                  from: original.invoiceType,
+                  to: invoiceType,
+                  at: DateTime.now(),
+                )),
+                invoiceDate: Value(date.toIso8601String()),
+              ),
+        );
+      });
+
+  /// Refuses any amount-changing edit once the invoice is paid in full.
+  ///
+  /// Belt and braces with [updateInvoiceMetadata]: that method can't write
+  /// money, and these can't run when money is frozen. Between them the billed
+  /// amount is unreachable after payment regardless of what any screen does.
+  Future<void> _guardMoneyFrozen(DbInvoice original) async {
+    final paid = await _paidCents(original.id);
+    if (isInvoiceFullyPaid(original, paid)) {
+      throw const InvoiceEditException(
+        'This invoice is paid in full, so the billed amount can no longer be '
+        'changed. Use Edit Details to correct the type, date or notes.',
+      );
+    }
+  }
+
   /// In-place edit of a T&M (`'extras'`) invoice. Recomputes totals from the
   /// passed [labourCents]/[materialsCents] (the caller decides whether those are
   /// the stored aggregates — metadata-only edit — or a live re-sum of a changed
@@ -258,6 +388,7 @@ class InvoiceEditActions extends Notifier<AsyncValue<void>> {
     required DateTime date,
   }) =>
       _run(() async {
+        await _guardMoneyFrozen(original);
         final subtotal = labourCents + materialsCents;
         final discountCents = discountAmountCents +
             (subtotal * discountPercent / 100).round();
@@ -325,6 +456,7 @@ class InvoiceEditActions extends Notifier<AsyncValue<void>> {
     int? tax1AmountCents,
   }) =>
       _run(() async {
+        await _guardMoneyFrozen(original);
         final computed = computeInvoiceTotals(
           subtotalCents: amountCents,
           tax1Rate: tax1Rate,
@@ -354,7 +486,14 @@ class InvoiceEditActions extends Notifier<AsyncValue<void>> {
                 poNumber: Value(poNumber),
                 workDescription: Value(workDescription),
                 notes: Value(notes),
-                internalNotes: Value(internalNotes),
+                // Recorded here too, so a type correction leaves the same trace
+                // whether it happens before or after the invoice is paid.
+                internalNotes: Value(appendTypeChangeNote(
+                  internalNotes,
+                  from: original.invoiceType,
+                  to: invoiceType,
+                  at: DateTime.now(),
+                )),
                 invoiceDate: Value(date.toIso8601String()),
               ),
         );
